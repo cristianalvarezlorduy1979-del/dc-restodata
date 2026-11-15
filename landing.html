@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DC RestoData - Plataforma Integral de Inteligencia Financiera y Costos Gastronómicos</title>
+  <meta name="description" content="Plataforma SaaS en la nube para restaurantes, bares y cafeterías. Control de ventas, P&L automático, costeo de recetas por porción y cotizador financiero de eventos.">
+  
+  <!-- Favicon y PWA -->
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <meta name="theme-color" content="#0b192c">
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-dark: #070f1e;
+      --bg-navy: #0b192c;
+      --bg-card: #112239;
+      --bg-card-hover: #162c4a;
+      --accent-gold: #f59e0b;
+      --accent-gold-light: #fbbf24;
+      --accent-gold-dark: #d97706;
+      --accent-emerald: #10b981;
+      --accent-cyan: #06b6d4;
+      --text-white: #ffffff;
+      --text-slate: #cbd5e1;
+      --text-muted: #94a3b8;
+      --border-dark: rgba(255, 255, 255, 0.08);
+      --border-gold: rgba(245, 158, 11, 0.35);
+      --shadow-glow: 0 0 35px rgba(245, 158, 11, 0.15);
+      --font-heading: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-slate);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* Contenedor central */
+    .container {
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Tipografías */
+    h1, h2, h3, h4, .brand-logo {
+      font-family: var(--font-heading);
+      color: var(--text-white);
+    }
+
+    .text-gold { color: var(--accent-gold); }
+    .text-emerald { color: var(--accent-emerald); }
+    .text-cyan { color: var(--accent-cyan); }
+
+    /* Barra Superior / Navbar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(11, 25, 44, 0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-dark);
+      z-index: 1000;
+      padding: 12px 0;
+      transition: all 0.3s ease;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0b192c;
+      font-size: 1.05rem;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      flex-shrink: 0;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      list-style: none;
+      flex-shrink: 1;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links li {
+      white-space: nowrap;
+    }
+
+    .nav-links a {
+      color: var(--text-slate);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: color 0.2s;
+      white-space: nowrap;
+      padding: 4px 6px;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-gold);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    /* Botones */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      font-size: 0.90rem;
+      font-weight: 700;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      border: none;
+      white-space: nowrap;
+    }
+
+    .navbar .btn {
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
+      color: #0b192c;
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
+    }
+
+    .btn-gold:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 26px rgba(245, 158, 11, 0.5);
+      background: linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold));
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-white);
+      border: 1.5px solid var(--border-dark);
+    }
+
+    .btn-outline:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.25);
+      color: var(--text-white);
+      transform: translateY(-2px);
+    }
+
+    .btn-whatsapp {
+      background: #25d366;
+      color: #ffffff;
+      box-shadow: 0 4px 20px rgba(37, 211, 102, 0.35);
+    }
+
+    .btn-whatsapp:hover {
+      background: #20ba59;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 26px rgba(37, 211, 102, 0.5);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 150px 0 90px;
+      position: relative;
+      background: radial-gradient(circle at 50% 15%, rgba(245, 158, 11, 0.12) 0%, transparent 60%);
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid var(--border-gold);
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      margin-bottom: 22px;
+      animation: pulseGlow 2.5s infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 rgba(245, 158, 11, 0); }
+      50% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.25); }
+    }
+
+    .hero-title {
+      font-size: 3.4rem;
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      max-width: 950px;
+      margin: 0 auto 20px;
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, #ffffff 40%, var(--accent-gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 1.18rem;
+      color: var(--text-muted);
+      max-width: 760px;
+      margin: 0 auto 36px;
+      font-weight: 400;
+      line-height: 1.65;
+    }
+
+    .hero-buttons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 50px;
+      flex-wrap: wrap;
+    }
+
+    /* Mockup Showcase Hero */
+    .hero-mockup-wrapper {
+      position: relative;
+      max-width: 1040px;
+      margin: 0 auto;
+      border-radius: 18px;
+      padding: 10px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(255, 255, 255, 0.05));
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8);
+    }
+
+    .hero-mockup {
+      background: var(--bg-navy);
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--border-dark);
+      text-align: left;
+    }
+
+    .mockup-header {
+      background: #081322;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-dark);
+    }
+
+    .mockup-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .mockup-body {
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 20px;
+    }
+
+    .mockup-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .mockup-stat-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .mockup-stat-val {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--text-white);
+      margin-bottom: 8px;
+    }
+
+    /* Sección de Dolores vs Solución */
+    .section {
+      padding: 100px 0;
+      position: relative;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto 60px;
+    }
+
+    .section-tag {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-subtitle {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    .comparison-card {
+      padding: 36px 32px;
+      border-radius: 16px;
+      position: relative;
+    }
+
+    .card-before {
+      background: rgba(239, 68, 68, 0.04);
+      border: 1.5px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .card-after {
+      background: rgba(16, 185, 129, 0.05);
+      border: 1.5px solid rgba(16, 185, 129, 0.35);
+      box-shadow: 0 10px 40px -10px rgba(16, 185, 129, 0.15);
+    }
+
+    .card-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .comparison-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .comparison-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.95rem;
+    }
+
+    .icon-fail { color: #ef4444; margin-top: 4px; }
+    .icon-success { color: #10b981; margin-top: 4px; }
+
+    /* Módulos Estrella */
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .module-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .module-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--border-gold);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .module-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid var(--border-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: var(--accent-gold);
+      margin-bottom: 20px;
+    }
+
+    .module-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .module-desc {
+      font-size: 0.90rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Calculadora de Retorno de Inversión */
+    .roi-box {
+      background: linear-gradient(135deg, #0d2038, #0a182b);
+      border: 2px solid var(--border-gold);
+      border-radius: 20px;
+      padding: 44px 36px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .roi-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .slider-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-bottom: 8px;
+    }
+
+    .slider-input {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: #1e3a5f;
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    .slider-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent-gold);
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+    }
+
+    .roi-result {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dark);
+      border-radius: 16px;
+      padding: 32px;
+      text-align: center;
+    }
+
+    .roi-number {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--accent-emerald);
+      margin: 12px 0 6px;
+      letter-spacing: -0.02em;
+    }
+
+    /* Planes y Precios */
+    .billing-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--bg-card);
+      padding: 6px;
+      border-radius: 30px;
+      border: 1px solid var(--border-dark);
+      width: fit-content;
+      margin: 0 auto 50px;
+    }
+
+    .toggle-btn {
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-muted);
+      border: none;
+      background: transparent;
+      transition: all 0.2s;
+    }
+
+    .toggle-btn.active {
+      background: var(--accent-gold);
+      color: #0b192c;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-discount {
+      background: #10b981;
+      color: #ffffff;
+      font-size: 0.68rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: 4px;
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 26px;
+      align-items: stretch;
+    }
+
+    .pricing-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-dark);
+      border-radius: 20px;
+      padding: 36px 30px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-6px);
+    }
+
+    .pricing-card.featured {
+      border-color: var(--accent-gold);
+      background: linear-gradient(180deg, #162b48 0%, var(--bg-card) 100%);
+      box-shadow: 0 15px 45px rgba(245, 158, 11, 0.18);
+    }
+
+    .pricing-ribbon {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
+      color: #0b192c;
+      font-size: 0.72rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      padding: 4px 16px;
+      border-radius: 12px;
+      letter-spacing: 0.05em;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+
+    .plan-name {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .plan-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+      min-height: 42px;
+    }
+
+    .plan-price-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 26px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-dark);
+    }
+
+    .plan-currency {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+
+    .plan-price {
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: var(--text-white);
+      letter-spacing: -0.02em;
+    }
+
+    .plan-period {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .plan-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex-grow: 1;
+    }
+
+    .plan-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.90rem;
+    }
+
+    .plan-features li i {
+      color: var(--accent-gold);
+      font-size: 0.9rem;
+    }
+
+    /* CTA Final */
+    .cta-banner {
+      background: linear-gradient(135deg, #102644, #081525);
+      border: 1.5px solid var(--border-gold);
+      border-radius: 24px;
+      padding: 60px 40px;
+      text-align: center;
+      margin: 80px 0 100px;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .cta-banner h2 {
+      font-size: 2.6rem;
+      margin-bottom: 16px;
+    }
+
+    .cta-banner p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 650px;
+      margin: 0 auto 32px;
+    }
+
+    /* Botón Flotante de WhatsApp */
+    .floating-whatsapp {
+      position: fixed;
+      bottom: 26px;
+      right: 26px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #25d366;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45);
+      z-index: 9999;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .floating-whatsapp:hover {
+      transform: scale(1.12);
+      box-shadow: 0 12px 30px rgba(37, 211, 102, 0.6);
+    }
+
+    /* Footer */
+    footer {
+      background: #040912;
+      border-top: 1px solid var(--border-dark);
+      padding: 40px 0;
+      text-align: center;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--accent-gold);
+      text-decoration: none;
+    }
+
+    /* Responsivo */
+    @media (max-width: 1100px) {
+      .nav-links { display: none !important; }
+    }
+    @media (max-width: 992px) {
+      
+      .hero-title { font-size: 2.6rem; }
+      .comparison-grid, .mockup-body, .roi-box, .pricing-grid { grid-template-columns: 1fr; }
+      .modules-grid { grid-template-columns: 1fr 1fr; }
+      
+    }
+
+    @media (max-width: 640px) {
+      .hero-title { font-size: 2.1rem; }
+      .modules-grid { grid-template-columns: 1fr; }
+      .hero-buttons { flex-direction: column; width: 100%; }
+      .hero-buttons .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ======================================================================
+       BARRA DE NAVEGACIÓN SUPERIOR
+       ====================================================================== -->
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="landing.html" class="brand-logo">
+        <div class="brand-icon">
+          <i class="fa-solid fa-utensils"></i>
+        </div>
+        <span>DC RESTODATA</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#beneficios">Beneficios</a></li>
+        <li><a href="#modulos">Módulos</a></li>
+        <li><a href="#modulos">Recetario</a></li>
+        <li><a href="#calculadora">Calculadora</a></li>
+        <li><a href="#planes">Planes</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="index.html" class="btn btn-outline" title="Iniciar sesión en DC RestoData">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i>
+          <span>Ingresar</span>
+        </a>
+        <a href="https://wa.me/573165443285?text=Hola%20DC%20Asesorías,%20quiero%20conocer%20más%20sobre%20DC%20RestoData%20y%20agendar%20una%20demostración" target="_blank" class="btn btn-gold">
+          <i class="fa-brands fa-whatsapp"></i>
+          <span>Agendar Demo</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ======================================================================
+       HERO SECTION
+       ====================================================================== -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">
+        <i class="fa-solid fa-crown text-gold"></i>
+        <span>Plataforma Cloud de Inteligencia Financiera Gastronómica</span>
+      </div>
+
+      <h1 class="hero-title">
+        Deja de adivinar tus ganancias.<br>
+        <span>Toma el control financiero total de tu restaurante.</span>
+      </h1>
+
+      <p class="hero-desc">
+        La plataforma SaaS en la nube que audita tus ventas diarias, cuadra formas de pago, genera tu estado de resultados P&L en tiempo real y estandariza tus recetas con costeo exacto por porción.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="https://wa.me/573165443285?text=Hola%20DC%20Asesorías,%20quiero%20ver%20una%20demostración%20gratuita%20de%20DC%20RestoData" target="_blank" class="btn btn-whatsapp" style="font-size: 1.05rem; padding: 14px 28px;">
+          <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i>
+          <span>Solicitar Demostración Gratuita</span>
+        </a>
+        <a href="#planes" class="btn btn-outline" style="font-size: 1.05rem; padding: 14px 28px;">
+          <i class="fa-solid fa-tags text-gold"></i>
+          <span>Ver Planes y Precios</span>
+        </a>
+      </div>
+
+      <!-- Mockup Interactivo / Vista Previa -->
+      <div class="hero-mockup-wrapper">
+        <div class="hero-mockup">
+          <div class="mockup-header">
+            <div class="mockup-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <div style="font-size: 0.80rem; color: #94a3b8; font-weight: 600;">
+              <i class="fa-solid fa-lock text-emerald"></i> https://dcasesorias-col.web.app - Panel Ejecutivo
+            </div>
+            <div><span class="badge-discount" style="background:#0284c7;">v10.65 Cloud</span></div>
+          </div>
+          <div class="mockup-body">
+            <div class="mockup-card">
+              <span class="mockup-stat-title">Estado de Ganancias y Pérdidas (P&L Mes Actual)</span>
+              <div class="mockup-stat-val text-emerald">$ 48'750.000 <span style="font-size: 0.9rem; font-weight:500; color:#94a3b8;">COP Ventas Netas</span></div>
+              <div style="display:flex; justify-content:space-between; font-size:0.85rem; border-top:1px solid #1e3a5f; padding-top:8px; margin-top:8px;">
+                <span>Costo Materia Prima (COGS):</span>
+                <strong class="text-gold">31.4% (Óptimo)</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:0.85rem; padding-top:4px;">
+                <span>Utilidad Operativa Real:</span>
+                <strong class="text-emerald">22.8% ($ 11'115.000 COP)</strong>
+              </div>
+            </div>
+
+            <div class="mockup-card" style="border-left: 3px solid var(--accent-gold);">
+              <span class="mockup-stat-title"><i class="fa-solid fa-book-open-reader text-gold"></i> Ficha Técnica Activa: Lomo al Trapo</span>
+              <div style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 6px;">Costo Porción: <strong class="text-emerald">$ 14.850 COP</strong></div>
+              <p style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 8px;">Precio sugerido con margen del 68%: <strong>$ 46.400 COP</strong></p>
+              <div style="background: rgba(16, 185, 129, 0.15); color:#10b981; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">
+                <i class="fa-solid fa-check"></i> Margen blindado contra fluctuación de insumos
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       SECCIÓN: EL ANTES Y EL DESPUÉS
+       ====================================================================== -->
+  <section class="section" id="beneficios">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">¿Por qué elegir DC RestoData?</span>
+        <h2 class="section-title">El fin de las fugas de dinero en tu negocio</h2>
+        <p class="section-subtitle">Diseñado por asesores financieros especializados para resolver los problemas reales que enfrentan los restaurantes cada semana.</p>
+      </div>
+
+      <div class="comparison-grid">
+        <!-- Sin DC RestoData -->
+        <div class="comparison-card card-before">
+          <div class="card-title" style="color: #ef4444;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Sin DC RestoData</span>
+          </div>
+          <ul class="comparison-list">
+            <li><i class="fa-solid fa-xmark icon-fail"></i> <span><strong>Cuentas al tanteo:</strong> No sabes cuánto ganas hasta semanas después del cierre de mes.</span></li>
+            <li><i class="fa-solid fa-xmark icon-fail"></i> <span><strong>Recetas desactualizadas:</strong> Si la carne o el aceite suben de precio, pierdes margen sin darte cuenta.</span></li>
+            <li><i class="fa-solid fa-xmark icon-fail"></i> <span><strong>Descuadres de caja:</strong> Horas perdidas verificando datafonos, efectivo, transferencias y propinas.</span></li>
+            <li><i class="fa-solid fa-xmark icon-fail"></i> <span><strong>Cotizaciones a ciegas:</strong> Cobras eventos especiales sin saber si cubren la logística y la nómina.</span></li>
+          </ul>
+        </div>
+
+        <!-- Con DC RestoData -->
+        <div class="comparison-card card-after">
+          <div class="card-title" style="color: #10b981;">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Con DC RestoData</span>
+          </div>
+          <ul class="comparison-list">
+            <li><i class="fa-solid fa-check icon-success"></i> <span><strong>Auditoría en tiempo real:</strong> Tableros diarios y comparativos de ventas a un solo clic.</span></li>
+            <li><i class="fa-solid fa-check icon-success"></i> <span><strong>Fichas Técnicas Dinámicas:</strong> Cada gramo e ingrediente costeado con su porcentaje ideal.</span></li>
+            <li><i class="fa-solid fa-check icon-success"></i> <span><strong>P&L Automático:</strong> Estado de resultados claro con ventas netas, costos COGS y utilidad real.</span></li>
+            <li><i class="fa-solid fa-check icon-success"></i> <span><strong>Cotizador Financiero:</strong> Simula el precio perfecto de venta para eventos y platos con margen garantizado.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       SECCIÓN: LOS 17 MÓDULOS DE LA PLATAFORMA
+       ====================================================================== -->
+  <section class="section" id="modulos" style="background: rgba(255, 255, 255, 0.015);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Capacidad Operativa Total</span>
+        <h2 class="section-title">17 Módulos Diseñados para la Gastronomía</h2>
+        <p class="section-subtitle">Toda la operación contable, de cocina y gerencial conectada en una sola plataforma web en la nube.</p>
+      </div>
+
+      <div class="modules-grid">
+        <div class="module-card">
+          <div class="module-icon-wrap"><i class="fa-solid fa-chart-line"></i></div>
+          <h3 class="module-title">Ventas Diarias y Medios de Pago</h3>
+          <p class="module-desc">Cuadre exacto día por día de efectivo, tarjetas, plataformas delivery y transferencias bancarias sin errores humanos.</p>
+        </div>
+
+        <div class="module-card">
+          <div class="module-icon-wrap"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+          <h3 class="module-title">Análisis Mensual (P&L Real)</h3>
+          <p class="module-desc">Estado de Pérdidas y Ganancias automático: ventas netas, costos de alimentos y bebidas, nómina, gastos fijos y EBITDA.</p>
+        </div>
+
+        <div class="module-card">
+          <div class="module-icon-wrap"><i class="fa-solid fa-book-open-reader"></i></div>
+          <h3 class="module-title">Recetario y Fichas Técnicas</h3>
+          <p class="module-desc">Estandarización de recetas con costeo por ingredientes, cálculo de mermas, costo porción y precio de venta ideal.</p>
+        </div>
+
+        <div class="module-card">
+          <div class="module-icon-wrap"><i class="fa-solid fa-calculator"></i></div>
+          <h3 class="module-title">Cotizador Financiero de Platos</h3>
+          <p class="module-desc">Simulador de precios para nuevos platos en carta o cotización de eventos corporativos, catering y banquetes.</p>
+        </div>
+
+        <div class="module-card">
+          <div class="module-icon-wrap"><i class="fa-solid fa-truck-ramp-box"></i></div>
+          <h3 class="module-title">Compras por Proveedor e Insumo</h3>
+          <p class="module-desc">Histórico de compras para negociar mejores precios, detectar incrementos injustificados de precios y controlar proveedores.</p>
+        </div>
+
+        <div class="module-card">
+          <div class="module-icon-wrap"><i class="fa-solid fa-users"></i></div>
+          <h3 class="module-title">Control de Nómina y Propinas</h3>
+          <p class="module-desc">Distribución transparente de propinas por mesero y control del porcentaje que representa la nómina sobre las ventas.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       SECCIÓN: CALCULADORA INTERACTIVA DE RETORNO DE INVERSIÓN (ROI)
+       ====================================================================== -->
+  <section class="section" id="calculadora">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Calcula tu Impacto Financiero</span>
+        <h2 class="section-title">¿Cuánto dinero estás perdiendo sin saberlo?</h2>
+        <p class="section-subtitle">Al optimizar solo un 3% en control de mermas y costos de recetas con DC RestoData, mira cuánto dinero ahorras cada mes:</p>
+      </div>
+
+      <div class="roi-box">
+        <div class="roi-controls">
+          <div class="slider-group">
+            <label>
+              <span>Venta Mensual Estimada:</span>
+              <strong id="lbl-roi-ventas" class="text-gold" style="font-size: 1.15rem;">$ 45'000.000 COP</strong>
+            </label>
+            <input type="range" id="input-roi-ventas" class="slider-input" min="10000000" max="250000000" step="5000000" value="45000000">
+          </div>
+
+          <div class="slider-group">
+            <label>
+              <span>Porcentaje de Optimización de Costos:</span>
+              <strong id="lbl-roi-ahorro" class="text-cyan" style="font-size: 1.15rem;">3.5%</strong>
+            </label>
+            <input type="range" id="input-roi-ahorro" class="slider-input" min="1" max="8" step="0.5" value="3.5">
+          </div>
+          
+          <p style="font-size: 0.85rem; color: #94a3b8; line-height: 1.5;">
+            *Estimación promedio obtenida por restaurantes que implementan auditoría de insumos y estandarización de recetas con DC RestoData.
+          </p>
+        </div>
+
+        <div class="roi-result">
+          <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8;">Tu Ahorro Mensual Estimado:</span>
+          <div class="roi-number" id="lbl-roi-total">$ 1'575.000</div>
+          <span style="font-size: 0.85rem; color: #cbd5e1; font-weight: 600;">COP adicionales en tu utilidad cada mes</span>
+          <div style="margin-top: 20px;">
+            <a href="https://wa.me/573165443285?text=Hola%20DC%20Asesorías,%20quiero%20empezar%20a%20ahorrar%20costos%20con%20DC%20Restaurantes" target="_blank" class="btn btn-gold" style="width: 100%;">
+              <i class="fa-solid fa-arrow-trend-up"></i>
+              <span>Recuperar mi Margen Ahora</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       SECCIÓN: PLANES Y TARIFAS
+       ====================================================================== -->
+  <section class="section" id="planes" style="background: rgba(255, 255, 255, 0.015);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Inversión Transparente</span>
+        <h2 class="section-title">Elige el plan ideal para tu restaurante</h2>
+        <p class="section-subtitle">Sin contratos amarrados. Acceso inmediato a la nube y soporte especializado.</p>
+        <div style="margin-top: 16px;">
+          <button type="button" id="btn-landing-edit-prices" class="btn btn-outline" style="border-color: var(--accent-gold); color: var(--accent-gold); font-weight: 700; padding: 10px 22px; border-radius: 25px; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; gap: 9px; background: rgba(245, 158, 11, 0.12); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15); transition: all 0.25s ease;">
+            <i class="fa-solid fa-tags text-gold"></i>
+            <span>⚙️ Modificar Tarifas de Planes</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Selector de Periodicidad -->
+      <div class="billing-toggle">
+        <button type="button" class="toggle-btn active" data-period="mensual">Mensual</button>
+        <button type="button" class="toggle-btn" data-period="trimestral">Trimestral <span class="badge-discount">-5%</span></button>
+        <button type="button" class="toggle-btn" data-period="semestral">Semestral <span class="badge-discount">-10%</span></button>
+        <button type="button" class="toggle-btn" data-period="anual">Anual <span class="badge-discount">2 Meses Gratis</span></button>
+      </div>
+
+      <!-- Cuadrícula de Precios -->
+      <div class="pricing-grid">
+        
+        <!-- Plan Básico -->
+        <div class="pricing-card">
+          <h3 class="plan-name">🥉 Plan Básico</h3>
+          <p class="plan-desc">Control operativo y auditoría diaria de ventas, formas de pago y costos de compras.</p>
+          <div class="plan-price-wrap">
+            <span class="plan-currency">$</span>
+            <span class="plan-price" id="price-basico">800.000</span>
+            <span class="plan-period" id="period-basico">/ mes</span>
+          </div>
+          <ul class="plan-features">
+            <li><i class="fa-solid fa-check"></i> <strong>12 Módulos</strong> Operativos y Costos</li>
+            <li><i class="fa-solid fa-check"></i> Ventas Diarias y Formas de Pago</li>
+            <li><i class="fa-solid fa-check"></i> Compras por Proveedor e Insumo</li>
+            <li><i class="fa-solid fa-check"></i> Gastos Mensuales y Nómina</li>
+            <li><i class="fa-solid fa-check"></i> Desperdicios, Almuerzos y Propinas</li>
+            <li><i class="fa-solid fa-check"></i> Acceso Nube Multidispositivo</li>
+          </ul>
+          <a href="https://wa.me/573165443285?text=Hola%20DC%20Asesorías,%20me%20interesa%20el%20Plan%20Básico%20de%20DC%20RestoData" target="_blank" class="btn btn-outline" style="width: 100%;">
+            <span>Elegir Plan Básico</span>
+          </a>
+        </div>
+
+        <!-- Plan Estándar -->
+        <div class="pricing-card">
+          <h3 class="plan-name">🥈 Plan Estándar</h3>
+          <p class="plan-desc">Para restaurantes que necesitan inteligencia gerencial y auditoría P&L mes a mes.</p>
+          <div class="plan-price-wrap">
+            <span class="plan-currency">$</span>
+            <span class="plan-price" id="price-estandar">1'000.000</span>
+            <span class="plan-period" id="period-estandar">/ mes</span>
+          </div>
+          <ul class="plan-features">
+            <li><i class="fa-solid fa-check"></i> <strong>15 Módulos</strong> Financieros</li>
+            <li><i class="fa-solid fa-check"></i> <strong>Todo lo del Plan Básico</strong></li>
+            <li><i class="fa-solid fa-check"></i> Comparativo de Ventas Intermensual</li>
+            <li><i class="fa-solid fa-check"></i> <strong>Análisis Mensual P&L (Ganancias/Pérdidas)</strong></li>
+            <li><i class="fa-solid fa-check"></i> Consolidado Anual Financiero</li>
+            <li><i class="fa-solid fa-check"></i> Soporte Prioritario de DC Asesorías</li>
+          </ul>
+          <a href="https://wa.me/573165443285?text=Hola%20DC%20Asesorías,%20me%20interesa%20el%20Plan%20Estándar%20de%20DC%20RestoData" target="_blank" class="btn btn-outline" style="width: 100%;">
+            <span>Elegir Plan Estándar</span>
+          </a>
+        </div>
+
+        <!-- Plan Pro -->
+        <div class="pricing-card featured">
+          <div class="pricing-ribbon">Recomendado para Máxima Rentabilidad</div>
+          <h3 class="plan-name" style="color: var(--accent-gold);">🥇 Plan Pro</h3>
+          <p class="plan-desc">La suite gastronómica más avanzada con estandarización culinaria y cotizador de platos.</p>
+          <div class="plan-price-wrap">
+            <span class="plan-currency text-gold">$</span>
+            <span class="plan-price text-gold" id="price-pro">1'200.000</span>
+            <span class="plan-period" id="period-pro">/ mes</span>
+          </div>
+          <ul class="plan-features">
+            <li><i class="fa-solid fa-crown text-gold"></i> <strong>17 Módulos Completos (Suite Total)</strong></li>
+            <li><i class="fa-solid fa-check"></i> <strong>Todo lo del Plan Estándar</strong></li>
+            <li><i class="fa-solid fa-check"></i> <strong>Recetario y Fichas Técnicas Dinámicas</strong></li>
+            <li><i class="fa-solid fa-check"></i> Costeo exacto por ingrediente y porción</li>
+            <li><i class="fa-solid fa-check"></i> <strong>Cotizador Financiero de Platos y Eventos</strong></li>
+            <li><i class="fa-solid fa-check"></i> Botones de Acceso Rápido Culinario en Cabecera</li>
+          </ul>
+          <a href="https://wa.me/573165443285?text=Hola%20DC%20Asesorías,%20quiero%20el%20Plan%20Pro%20de%20DC%20RestoData%20con%20Recetario%20y%20Cotizador" target="_blank" class="btn btn-gold" style="width: 100%;">
+            <i class="fa-solid fa-star"></i>
+            <span>Adquirir Plan Pro</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================================
+       BANNER CTA FINAL
+       ====================================================================== -->
+  <div class="container">
+    <div class="cta-banner">
+      <h2>Transforma los números de tu restaurante hoy mismo</h2>
+      <p>Únete a los restaurantes que ya eliminaron la incertidumbre financiera y aumentaron su margen de utilidad con DC RestoData.</p>
+      <div style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
+        <a href="https://wa.me/573165443285?text=Hola%20DC%20Asesorías,%20quiero%20agendar%20una%20reunión%20para%20conocer%20DC%20Restaurantes" target="_blank" class="btn btn-whatsapp" style="font-size: 1.05rem; padding: 14px 28px;">
+          <i class="fa-brands fa-whatsapp"></i>
+          <span>Contactar a un Asesor por WhatsApp</span>
+        </a>
+        <a href="index.html" class="btn btn-outline" style="font-size: 1.05rem; padding: 14px 28px;">
+          <i class="fa-solid fa-desktop"></i>
+          <span>Iniciar Sesión en la Plataforma</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón Flotante de WhatsApp -->
+  <a href="https://wa.me/573165443285?text=Hola%20DC%20Asesorías,%20deseo%20más%20información%20sobre%20DC%20RestoData" target="_blank" class="floating-whatsapp" title="Hablar con un asesor de DC RestoData">
+    <i class="fa-brands fa-whatsapp"></i>
+  </a>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p style="margin-bottom: 8px;"><strong>DC RestoData</strong> — Sistema Integral Gastronómico y Financiero.</p>
+      <p>Desarrollado con excelencia por <a href="https://dcasesorias-col.web.app" target="_blank">DC Asesorías Empresariales</a> &bull; Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- MODAL: CAMBIAR PRECIOS DE PLANES DIRECTAMENTE EN LA WEB COMERCIAL -->
+  <div id="modal-landing-prices" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(7, 15, 30, 0.85); backdrop-filter: blur(8px); z-index: 999999; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #0f1f38; border: 1.5px solid var(--border-gold); border-radius: 16px; width: 100%; max-width: 500px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); overflow: hidden;">
+      <div style="padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between;">
+        <h4 style="margin: 0; color: #fff; font-size: 1.15rem; font-family: var(--font-heading); display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-tags text-gold"></i> Modificar Tarifas de Planes
+        </h4>
+        <button type="button" id="btn-close-landing-prices" style="background: transparent; border: none; color: #94a3b8; font-size: 1.6rem; cursor: pointer; line-height: 1;">&times;</button>
+      </div>
+      <div style="padding: 24px;">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5;">
+          Ajusta los precios mensuales base (en $ COP). Al guardar, se actualizarán en vivo en esta página y en el sistema:
+        </p>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #38bdf8; margin-bottom: 6px;">
+            🥉 Plan Básico (Mensual):
+          </label>
+          <div style="display: flex; align-items: center; background: #070f1e; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 0 12px;">
+            <span style="color: var(--accent-gold); font-weight: 700; margin-right: 6px;">$</span>
+            <input type="number" id="input-landing-price-basico" style="background: transparent; border: none; color: #fff; font-size: 1.05rem; font-weight: 700; width: 100%; padding: 10px 0; outline: none;" placeholder="800000" step="10000">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #818cf8; margin-bottom: 6px;">
+            🥈 Plan Estándar (Mensual):
+          </label>
+          <div style="display: flex; align-items: center; background: #070f1e; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 0 12px;">
+            <span style="color: var(--accent-gold); font-weight: 700; margin-right: 6px;">$</span>
+            <input type="number" id="input-landing-price-estandar" style="background: transparent; border: none; color: #fff; font-size: 1.05rem; font-weight: 700; width: 100%; padding: 10px 0; outline: none;" placeholder="1000000" step="10000">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #34d399; margin-bottom: 6px;">
+            🥇 Plan Pro (Mensual):
+          </label>
+          <div style="display: flex; align-items: center; background: #070f1e; border: 1.5px solid var(--accent-gold); border-radius: 8px; padding: 0 12px;">
+            <span style="color: var(--accent-gold); font-weight: 700; margin-right: 6px;">$</span>
+            <input type="number" id="input-landing-price-pro" style="background: transparent; border: none; color: #fff; font-size: 1.05rem; font-weight: 700; width: 100%; padding: 10px 0; outline: none;" placeholder="1200000" step="10000">
+          </div>
+        </div>
+
+        <div id="landing-price-save-status" style="display: none; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px; text-align: center;"></div>
+
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+          <button type="button" id="btn-cancel-landing-prices" class="btn btn-outline" style="padding: 10px 18px; font-size: 0.9rem;">
+            Cancelar
+          </button>
+          <button type="button" id="btn-save-landing-prices" class="btn btn-gold" style="padding: 10px 22px; font-size: 0.9rem; font-weight: 700;">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar Nuevos Precios
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK para Sincronización en la Nube -->
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+
+  <!-- LÓGICA INTERACTIVA DE PRECIOS Y CALCULADORA ROI -->
+  <script>
+    // Configuración de Firebase para sincronizar tarifas con Firestore
+    const firebaseConfig = {
+      apiKey: "AIzaSyAolYKta-9BXe_hfQ0dEEGfNeEYavLVLoE",
+      authDomain: "dcasesorias-col.firebaseapp.com",
+      projectId: "dcasesorias-col",
+      storageBucket: "dcasesorias-col.firebasestorage.app",
+      messagingSenderId: "548314136322",
+      appId: "1:548314136322:web:a99cb5923c3ebbbbd4cc1b",
+      measurementId: "G-CK0RV5BTK0"
+    };
+
+    let firestoreDb = null;
+    try {
+      if (typeof firebase !== 'undefined') {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        firestoreDb = firebase.firestore();
+      }
+    } catch (e) {
+      console.warn('Firebase no inicializado en landing:', e);
+    }
+
+    // 1. Calculadora de Ahorro / Retorno de Inversión (ROI)
+    const inVentas = document.getElementById('input-roi-ventas');
+    const inAhorro = document.getElementById('input-roi-ahorro');
+    const lblVentas = document.getElementById('lbl-roi-ventas');
+    const lblAhorro = document.getElementById('lbl-roi-ahorro');
+    const lblTotal = document.getElementById('lbl-roi-total');
+
+    function fmtMoney(n) {
+      return '$ ' + Math.round(n).toLocaleString('es-CO');
+    }
+
+    function recalcROI() {
+      const v = Number(inVentas.value) || 45000000;
+      const pct = Number(inAhorro.value) || 3.5;
+      lblVentas.textContent = fmtMoney(v) + ' COP';
+      lblAhorro.textContent = pct.toFixed(1) + '%';
+      const ahorroTotal = v * (pct / 100);
+      lblTotal.textContent = fmtMoney(ahorroTotal);
+    }
+
+    if (inVentas && inAhorro) {
+      inVentas.addEventListener('input', recalcROI);
+      inAhorro.addEventListener('input', recalcROI);
+      recalcROI();
+    }
+
+    // 2. Conmutador de Periodicidad de Precios (Básico, Estándar, Pro)
+    let BASE_PRICES = {
+      basico: 800000,
+      estandar: 1000000,
+      pro: 1200000
+    };
+
+    // Cargar precios guardados en localStorage si existen
+    try {
+      const localCfg = JSON.parse(localStorage.getItem('dc_plans_pricing_config') || 'null');
+      if (localCfg) {
+        if (localCfg.basico) BASE_PRICES.basico = Number(localCfg.basico);
+        if (localCfg.estandar) BASE_PRICES.estandar = Number(localCfg.estandar);
+        if (localCfg.pro) BASE_PRICES.pro = Number(localCfg.pro);
+      }
+    } catch (e) {}
+
+    let currentPeriod = 'mensual';
+    const toggleBtns = document.querySelectorAll('.toggle-btn');
+    const priceBasico = document.getElementById('price-basico');
+    const priceEstandar = document.getElementById('price-estandar');
+    const pricePro = document.getElementById('price-pro');
+    const periodBasico = document.getElementById('period-basico');
+    const periodEstandar = document.getElementById('period-estandar');
+    const periodPro = document.getElementById('period-pro');
+
+    function updatePricing(period) {
+      currentPeriod = period || currentPeriod;
+      let mult = 1;
+      let desc = 0;
+      let labelPeriod = '/ mes';
+
+      if (currentPeriod === 'trimestral') {
+        mult = 3;
+        desc = 0.05;
+        labelPeriod = '/ trimestre (-5%)';
+      } else if (currentPeriod === 'semestral') {
+        mult = 6;
+        desc = 0.10;
+        labelPeriod = '/ semestre (-10%)';
+      } else if (currentPeriod === 'anual') {
+        mult = 10; // 2 meses gratis (cobro de 10 meses)
+        desc = 0;
+        labelPeriod = '/ año (2 meses gratis)';
+      }
+
+      const calc = (base) => Math.round((base * mult * (1 - desc)) / 1000) * 1000;
+
+      if (priceBasico) priceBasico.textContent = (calc(BASE_PRICES.basico)).toLocaleString('es-CO');
+      if (priceEstandar) priceEstandar.textContent = (calc(BASE_PRICES.estandar)).toLocaleString('es-CO');
+      if (pricePro) pricePro.textContent = (calc(BASE_PRICES.pro)).toLocaleString('es-CO');
+
+      if (periodBasico) periodBasico.textContent = labelPeriod;
+      if (periodEstandar) periodEstandar.textContent = labelPeriod;
+      if (periodPro) periodPro.textContent = labelPeriod;
+    }
+
+    toggleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        toggleBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const period = btn.getAttribute('data-period');
+        updatePricing(period);
+      });
+    });
+
+    // Render inicial
+    updatePricing('mensual');
+
+    // Sincronización en tiempo real desde Firestore si está conectado
+    if (firestoreDb) {
+      try {
+        firestoreDb.collection('system').doc('plans_pricing').onSnapshot((doc) => {
+          if (doc && doc.exists) {
+            const data = doc.data();
+            if (data) {
+              if (data.basico) BASE_PRICES.basico = Number(data.basico);
+              if (data.estandar) BASE_PRICES.estandar = Number(data.estandar);
+              if (data.pro) BASE_PRICES.pro = Number(data.pro);
+              localStorage.setItem('dc_plans_pricing_config', JSON.stringify({
+                ...JSON.parse(localStorage.getItem('dc_plans_pricing_config') || '{}'),
+                ...data
+              }));
+              updatePricing(currentPeriod);
+            }
+          }
+        });
+      } catch (err) {
+        console.warn('Error escuchando cambios de precios en Firestore:', err);
+      }
+    }
+
+    // 3. Modal para Cambiar Precios de los Planes
+    const btnLandingEditPrices = document.getElementById('btn-landing-edit-prices');
+    const modalLandingPrices = document.getElementById('modal-landing-prices');
+    const btnCloseLandingPrices = document.getElementById('btn-close-landing-prices');
+    const btnCancelLandingPrices = document.getElementById('btn-cancel-landing-prices');
+    const btnSaveLandingPrices = document.getElementById('btn-save-landing-prices');
+    const inPriceBasico = document.getElementById('input-landing-price-basico');
+    const inPriceEstandar = document.getElementById('input-landing-price-estandar');
+    const inPricePro = document.getElementById('input-landing-price-pro');
+    const saveStatus = document.getElementById('landing-price-save-status');
+
+    function openPricesModal() {
+      if (inPriceBasico) inPriceBasico.value = BASE_PRICES.basico;
+      if (inPriceEstandar) inPriceEstandar.value = BASE_PRICES.estandar;
+      if (inPricePro) inPricePro.value = BASE_PRICES.pro;
+      if (saveStatus) {
+        saveStatus.style.display = 'none';
+        saveStatus.textContent = '';
+      }
+      if (modalLandingPrices) modalLandingPrices.style.display = 'flex';
+    }
+
+    function closePricesModal() {
+      if (modalLandingPrices) modalLandingPrices.style.display = 'none';
+    }
+
+    if (btnLandingEditPrices) btnLandingEditPrices.addEventListener('click', openPricesModal);
+    if (btnCloseLandingPrices) btnCloseLandingPrices.addEventListener('click', closePricesModal);
+    if (btnCancelLandingPrices) btnCancelLandingPrices.addEventListener('click', closePricesModal);
+
+    if (modalLandingPrices) {
+      modalLandingPrices.addEventListener('click', (e) => {
+        if (e.target === modalLandingPrices) closePricesModal();
+      });
+    }
+
+    if (btnSaveLandingPrices) {
+      btnSaveLandingPrices.addEventListener('click', () => {
+        const b = Number(inPriceBasico?.value) || BASE_PRICES.basico;
+        const e = Number(inPriceEstandar?.value) || BASE_PRICES.estandar;
+        const p = Number(inPricePro?.value) || BASE_PRICES.pro;
+
+        BASE_PRICES.basico = b;
+        BASE_PRICES.estandar = e;
+        BASE_PRICES.pro = p;
+
+        // Guardar en localStorage
+        const existing = JSON.parse(localStorage.getItem('dc_plans_pricing_config') || '{}');
+        const updated = {
+          ...existing,
+          basico: b,
+          estandar: e,
+          pro: p
+        };
+        localStorage.setItem('dc_plans_pricing_config', JSON.stringify(updated));
+
+        // Guardar en Firestore
+        if (firestoreDb) {
+          firestoreDb.collection('system').doc('plans_pricing').set(updated, { merge: true })
+            .then(() => console.log('Precios guardados en Firestore'))
+            .catch(err => console.warn('Error guardando en Firestore:', err));
+        }
+
+        // Actualizar visualmente la página
+        updatePricing(currentPeriod);
+
+        // Feedback al usuario
+        if (saveStatus) {
+          saveStatus.style.display = 'block';
+          saveStatus.style.background = 'rgba(16, 185, 129, 0.2)';
+          saveStatus.style.border = '1px solid #10b981';
+          saveStatus.style.color = '#34d399';
+          saveStatus.textContent = '✓ ¡Precios actualizados y guardados correctamente!';
+        }
+
+        setTimeout(() => {
+          closePricesModal();
+        }, 1200);
+      });
+    }
+  </script>
+</body>
+</html>
