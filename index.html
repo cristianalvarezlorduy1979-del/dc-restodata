@@ -36,7 +36,7 @@
   </script>
   <!-- Google reCAPTCHA v3 SDK -->
   <script src="https://www.google.com/recaptcha/api.js?render=6LcBDRQuAAAAANfXf6euPklvVkXs6nxYszlE9obm"></script>
-  <link rel="stylesheet" href="styles.css?v=1.0">
+  <link rel="stylesheet" href="styles.css?v=1.0.1">
   <script>
     (function() {
       var isNative = Boolean(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
@@ -873,6 +873,45 @@
          ====================================================================== -->
     <section id="dashboard-section" class="dashboard-card hidden">
       
+      <!-- BACKDROP Y BARRA LATERAL DE OPCIONES (MENÚ RETRÁCTIL / OCULTABLE) -->
+      <div id="app-sidebar-backdrop" class="app-sidebar-backdrop"></div>
+      <aside id="app-sidebar" class="app-sidebar" aria-label="Navegación de Módulos">
+        <div class="sidebar-header">
+          <div class="sidebar-brand-group">
+            <img src="assets/logo-emblema.png?v=6.0" alt="DC RestoData" class="sidebar-brand-emblem">
+            <div class="sidebar-brand-text">
+              <span class="sidebar-brand-name">DC RESTODATA</span>
+              <span class="sidebar-brand-tag">v1.0 • Opciones</span>
+            </div>
+          </div>
+          <button type="button" id="btn-close-sidebar" class="sidebar-btn-hide" title="Ocultar menú lateral">
+            <i class="fa-solid fa-chevron-left"></i>
+            <span>Ocultar Menú</span>
+          </button>
+        </div>
+
+        <div class="sidebar-search-container">
+          <div class="sidebar-search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="sidebar-search-input" class="sidebar-search-input" placeholder="Buscar módulo (ej: nómina, ventas)..." autocomplete="off">
+          </div>
+        </div>
+
+        <nav class="sidebar-nav-container" id="sidebar-nav-container">
+          <!-- Categorías y módulos generados dinámicamente -->
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="sidebar-footer-info">
+            <i class="fa-solid fa-store" style="color:var(--accent-gold, #d4af37); margin-right:6px;"></i>
+            <span id="sidebar-footer-company-name">Empresa Activa</span>
+          </div>
+          <button type="button" id="btn-sidebar-close-bottom" class="btn btn-xs btn-outline-secondary" style="font-size:0.75rem; padding:3px 10px; border-radius:6px;">
+            <i class="fa-solid fa-xmark"></i> Cerrar
+          </button>
+        </div>
+      </aside>
+
       <!-- Barra superior corporativa -->
       <header class="dash-topbar">
         <div class="dash-brand">
@@ -1193,15 +1232,15 @@
         <!-- BARRA CORPORATIVA DE PERÍODO (FILTRO DE MES Y AÑO) -->
         <div class="period-control-bar" id="main-period-control-bar">
           
-          <!-- SELECTOR DE MÓDULO UNIFICADO (CÁPSULA) - ACTIVO EN MODO PRUEBAS -->
-          <div id="unified-capsule-wrapper" class="unified-capsule-wrapper" style="display: none;">
-            <button type="button" id="btn-capsule-module-selector" class="module-capsule-btn" title="Haga clic para desplegar todos los módulos">
-              <div class="capsule-icon-box" id="capsule-active-icon"><i class="fa-solid fa-chart-line"></i></div>
-              <div class="capsule-text-box">
-                <span class="capsule-subtext" id="capsule-active-category">VENTAS Y FACTURACIÓN</span>
-                <span class="capsule-maintext" id="capsule-active-title">Ventas Diarias</span>
+          <!-- BOTÓN TOGGLE PARA LA BARRA LATERAL DE OPCIONES (OCULTABLE) -->
+          <div id="sidebar-toggle-wrapper" class="sidebar-toggle-wrapper">
+            <button type="button" id="btn-open-sidebar" class="btn-sidebar-toggle" title="Abrir barra lateral de opciones">
+              <div class="toggle-icon-box"><i class="fa-solid fa-bars-staggered"></i></div>
+              <div class="toggle-text-box">
+                <span class="toggle-label">OPCIONES</span>
+                <span class="toggle-module-name" id="topbar-active-module-name">Ventas Diarias</span>
               </div>
-              <i class="fa-solid fa-chevron-down capsule-caret"></i>
+              <i class="fa-solid fa-chevron-right toggle-caret"></i>
             </button>
             <div class="unified-bar-separator"></div>
           </div>
@@ -1260,21 +1299,7 @@
             </button>
           </div>
 
-          <!-- PANEL FLOTANTE MEGA-MENÚ (DESPLEGABLE UNIFICADO) -->
-          <div id="module-mega-menu-overlay" class="module-mega-menu-overlay">
-            <div class="mega-menu-header">
-              <div class="mega-menu-search-wrapper">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="mega-menu-search-input" class="mega-menu-search-input" placeholder="Buscar módulo rápido (ej: nómina, insumos, ingeniería, compras)..." autocomplete="off">
-              </div>
-              <button type="button" id="btn-close-mega-menu" class="mega-menu-close-btn" title="Cerrar Menú">
-                <i class="fa-solid fa-xmark"></i>
-              </button>
-            </div>
 
-            <!-- Grilla de categorías generada dinámicamente -->
-            <div class="mega-menu-grid" id="mega-menu-grid"></div>
-          </div>
         </div>
 
         <!-- AVISO VISUAL DE MES EN BLANCO ESPERANDO INFORMACIÓN -->
@@ -1996,24 +2021,24 @@
             <table class="data-table table-sales-detail" id="table-sales">
               <colgroup>
                 <!-- Fecha / Día -->
-                <col style="width:72px; min-width:66px">
-                <col style="width:70px; min-width:62px">
+                <col style="width:70px; min-width:64px">
+                <col style="width:68px; min-width:60px">
                 <!-- Ventas por categoría -->
-                <col style="width:88px">
-                <col style="width:80px">
+                <col style="width:92px">
+                <col style="width:86px">
+                <col style="width:86px">
                 <col style="width:70px">
-                <col style="width:76px">
-                <col style="width:80px">
+                <col style="width:82px">
                 <!-- Totales -->
-                <col style="width:90px">
-                <col style="width:90px">
-                <col style="width:95px">
+                <col style="width:96px">
+                <col style="width:76px">
+                <col style="width:100px">
                 <!-- Servicio y PAX -->
-                <col style="width:78px">
-                <col style="width:58px">
-                <col style="width:60px">
                 <col style="width:82px">
-                <col style="width:82px">
+                <col style="width:54px">
+                <col style="width:54px">
+                <col style="width:84px">
+                <col style="width:84px">
               </colgroup>
               <thead>
                 <!-- Fila 1: Grupos -->
@@ -5856,7 +5881,7 @@
   <!-- Firebase SDK v10 Compat (Sincronización en la Nube Firestore en Tiempo Real) -->
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
-  <script src="app.js?v=1.0"></script>
+  <script src="app.js?v=1.0.1"></script>
   <script>
     // 1. Registro de Service Worker PWA con auto-actualización inmediata
     if ('serviceWorker' in navigator) {
@@ -5868,7 +5893,7 @@
         }
       });
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0').then((reg) => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.1').then((reg) => {
           reg.update();
         }).catch(err => console.log('SW reg note:', err));
       });

@@ -2315,16 +2315,22 @@ document.addEventListener('DOMContentLoaded', () => {
       activateTab(visibleBtn.getAttribute('data-tab'));
     }
 
-    // Navegación Unificada por Cápsula y Mega-Menú (Plataforma General)
+    // Navegación por Barra Lateral de Opciones (Sidebar Ocultable)
+    const sidebarToggleWrapper = document.getElementById('sidebar-toggle-wrapper');
     const unifiedWrapper = document.getElementById('unified-capsule-wrapper');
     const tabsNavWrapper = document.querySelector('.tabs-nav-wrapper');
     const tabsHeaderInfo = document.querySelector('.tabs-header-info');
     const periodRight = document.querySelector('.period-control-right');
 
-    if (unifiedWrapper) {
-      unifiedWrapper.style.display = 'inline-flex';
-      initMegaMenuNavigation(company);
+    if (sidebarToggleWrapper) {
+      sidebarToggleWrapper.style.display = 'inline-flex';
     }
+    if (unifiedWrapper) {
+      unifiedWrapper.style.display = 'none';
+    }
+    initSidebarNavigation(company);
+    initMegaMenuNavigation(company);
+
     if (tabsNavWrapper) {
       tabsNavWrapper.style.display = 'none';
     }
@@ -2399,6 +2405,206 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let _megaMenuCurrentActiveTab = 'tab-1-ventas-diarias';
   let _megaMenuFlattenedItems = [];
+
+  /* ==========================================================================
+     SISTEMA DE NAVEGACIÓN POR BARRA LATERAL (SIDEBAR OCULTABLE)
+     ========================================================================== */
+  function openSidebar() {
+    const sidebar = document.getElementById('app-sidebar');
+    const backdrop = document.getElementById('app-sidebar-backdrop');
+    if (sidebar) sidebar.classList.add('show');
+    if (backdrop) backdrop.classList.add('show');
+    const searchInput = document.getElementById('sidebar-search-input');
+    if (searchInput) {
+      searchInput.value = '';
+      filterSidebarItems('');
+      setTimeout(() => searchInput.focus(), 60);
+    }
+  }
+
+  function closeSidebar() {
+    const sidebar = document.getElementById('app-sidebar');
+    const backdrop = document.getElementById('app-sidebar-backdrop');
+    if (sidebar) sidebar.classList.remove('show');
+    if (backdrop) backdrop.classList.remove('show');
+  }
+
+  function toggleSidebar() {
+    const sidebar = document.getElementById('app-sidebar');
+    if (sidebar && sidebar.classList.contains('show')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  }
+
+  function filterSidebarItems(query) {
+    const q = (query || '').trim().toLowerCase();
+    const groups = document.querySelectorAll('.sidebar-category-group');
+    groups.forEach(group => {
+      let groupVisible = 0;
+      const items = group.querySelectorAll('.sidebar-item-btn');
+      items.forEach(btn => {
+        const text = btn.textContent.toLowerCase();
+        if (!q || text.includes(q)) {
+          btn.style.display = 'flex';
+          groupVisible++;
+        } else {
+          btn.style.display = 'none';
+        }
+      });
+      group.style.display = groupVisible > 0 ? 'flex' : 'none';
+    });
+  }
+
+  function setupSidebarEvents() {
+    const btnOpen = document.getElementById('btn-open-sidebar');
+    if (btnOpen && !btnOpen._hasSidebarListener) {
+      btnOpen._hasSidebarListener = true;
+      btnOpen.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleSidebar();
+      });
+    }
+
+    const btnClose = document.getElementById('btn-close-sidebar');
+    if (btnClose && !btnClose._hasSidebarListener) {
+      btnClose._hasSidebarListener = true;
+      btnClose.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeSidebar();
+      });
+    }
+
+    const btnCloseBottom = document.getElementById('btn-sidebar-close-bottom');
+    if (btnCloseBottom && !btnCloseBottom._hasSidebarListener) {
+      btnCloseBottom._hasSidebarListener = true;
+      btnCloseBottom.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeSidebar();
+      });
+    }
+
+    const backdrop = document.getElementById('app-sidebar-backdrop');
+    if (backdrop && !backdrop._hasSidebarListener) {
+      backdrop._hasSidebarListener = true;
+      backdrop.addEventListener('click', () => {
+        closeSidebar();
+      });
+    }
+
+    const searchInput = document.getElementById('sidebar-search-input');
+    if (searchInput && !searchInput._hasSidebarListener) {
+      searchInput._hasSidebarListener = true;
+      searchInput.addEventListener('input', (e) => {
+        filterSidebarItems(e.target.value);
+      });
+    }
+
+    if (!window._sidebarDocListenerAdded) {
+      window._sidebarDocListenerAdded = true;
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeSidebar();
+      });
+    }
+  }
+
+  function initSidebarNavigation(company) {
+    const navContainer = document.getElementById('sidebar-nav-container');
+    if (!navContainer) return;
+
+    const enabledModules = (company && Array.isArray(company.enabledModules)) ? company.enabledModules : ALL_SYSTEM_MODULES;
+    const isSandbox = (company && company.id === 'comp_demo_pruebas_sandbox');
+
+    navContainer.innerHTML = '';
+
+    MEGA_MENU_REGISTRY.forEach(cat => {
+      const isCulinary = !!cat.isPremium;
+      const validItems = cat.items.filter(item => {
+        if (isSandbox) return true;
+        return enabledModules.includes(item.id);
+      });
+
+      if (validItems.length === 0) return;
+
+      const groupEl = document.createElement('div');
+      groupEl.className = 'sidebar-category-group';
+
+      const catTitle = document.createElement('div');
+      catTitle.className = 'sidebar-category-title';
+      catTitle.innerHTML = `<i class="fa-solid ${cat.icon}"></i> <span>${cat.category}</span>`;
+      groupEl.appendChild(catTitle);
+
+      const itemsWrap = document.createElement('div');
+      itemsWrap.className = 'sidebar-category-items';
+
+      validItems.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `sidebar-item-btn ${isCulinary ? 'culinary-item' : ''}`;
+        btn.setAttribute('data-tab-target', item.id);
+        btn.innerHTML = `
+          <div class="sidebar-item-icon-box"><i class="fa-solid ${item.icon}"></i></div>
+          <span class="sidebar-item-name">${item.name}</span>
+          ${item.badge ? `<span class="sidebar-item-badge">${item.badge}</span>` : ''}
+        `;
+
+        btn.addEventListener('click', () => {
+          activateTab(item.id);
+          closeSidebar();
+        });
+
+        itemsWrap.appendChild(btn);
+      });
+
+      groupEl.appendChild(itemsWrap);
+      navContainer.appendChild(groupEl);
+    });
+
+    // Inyectar módulos personalizados si la empresa los tiene
+    if (company && company.customModules && Array.isArray(company.customModules) && company.customModules.length > 0) {
+      const customGroup = document.createElement('div');
+      customGroup.className = 'sidebar-category-group';
+      const catTitle = document.createElement('div');
+      catTitle.className = 'sidebar-category-title';
+      catTitle.innerHTML = '<i class="fa-solid fa-puzzle-piece"></i> <span>Módulos Personalizados</span>';
+      customGroup.appendChild(catTitle);
+
+      const itemsWrap = document.createElement('div');
+      itemsWrap.className = 'sidebar-category-items';
+
+      company.customModules.forEach((modName, idx) => {
+        const customTabId = `tab-custom-${idx + 1}`;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'sidebar-item-btn';
+        btn.setAttribute('data-tab-target', customTabId);
+        btn.innerHTML = `
+          <div class="sidebar-item-icon-box"><i class="fa-solid fa-puzzle-piece"></i></div>
+          <span class="sidebar-item-name">${modName}</span>
+        `;
+        btn.addEventListener('click', () => {
+          activateTab(customTabId);
+          closeSidebar();
+        });
+        itemsWrap.appendChild(btn);
+      });
+      customGroup.appendChild(itemsWrap);
+      navContainer.appendChild(customGroup);
+    }
+
+    // Actualizar nombre de empresa en el pie del sidebar
+    const footerCompany = document.getElementById('sidebar-footer-company-name');
+    if (footerCompany && company) {
+      footerCompany.textContent = company.companyName || 'Empresa Activa';
+    }
+
+    setupSidebarEvents();
+
+    const currentActiveContent = document.querySelector('.tab-content.active');
+    const initialTabId = currentActiveContent ? currentActiveContent.id : 'tab-1-ventas-diarias';
+    updateCapsuleSelector(initialTabId);
+  }
 
   function initMegaMenuNavigation(company) {
     const grid = document.getElementById('mega-menu-grid');
@@ -2650,6 +2856,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (titleBox) {
       titleBox.innerHTML = `${foundItem.name} ${foundItem.badge ? `<span style="font-size:0.7rem; background:rgba(255,215,0,0.25); color:#ffd700; padding:2px 8px; border-radius:10px; font-weight:700;">${foundItem.badge}</span>` : ''}`;
     }
+
+    const topbarModuleName = document.getElementById('topbar-active-module-name');
+    if (topbarModuleName && foundItem) {
+      topbarModuleName.textContent = foundItem.name;
+    }
+
+    document.querySelectorAll('.sidebar-item-btn').forEach(btn => {
+      if (btn.getAttribute('data-tab-target') === activeTabId) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
 
     document.querySelectorAll('.mega-menu-item-btn').forEach(btn => {
       if (btn.getAttribute('data-tab-target') === activeTabId) {
@@ -5993,21 +6212,21 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       // Formato estándar de 15 columnas para las demás empresas
       colgroup.innerHTML = `
-        <col style="width:72px; min-width:66px">
-        <col style="width:70px; min-width:62px">
-        <col style="width:88px">
-        <col style="width:80px">
+        <col style="width:70px; min-width:64px">
+        <col style="width:68px; min-width:60px">
+        <col style="width:92px">
+        <col style="width:86px">
+        <col style="width:86px">
         <col style="width:70px">
+        <col style="width:82px">
+        <col style="width:96px">
         <col style="width:76px">
-        <col style="width:80px">
-        <col style="width:90px">
-        <col style="width:90px">
-        <col style="width:95px">
-        <col style="width:78px">
-        <col style="width:58px">
-        <col style="width:60px">
+        <col style="width:100px">
         <col style="width:82px">
-        <col style="width:82px">
+        <col style="width:54px">
+        <col style="width:54px">
+        <col style="width:84px">
+        <col style="width:84px">
       `;
       thead.innerHTML = `
         <tr class="thead-group-row">
