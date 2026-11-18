@@ -472,6 +472,11 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAll14Modules();
     updateAuditPeriodBadge();
 
+    // Intentar sincronizar compras e insumos desde Netcup VPS para el nuevo período
+    if (typeof fetchPurchasesFromNetcup === 'function' && currentCompany && currentCompany.id) {
+      fetchPurchasesFromNetcup(currentCompany.id, newPeriodKey);
+    }
+
     // Guardar en almacenamiento local y sesión con protección de excepciones
     try {
       updateCurrentCompanyData();
@@ -3782,6 +3787,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const suppliers = bd.suppliers || [];
       const purchaseCosts = bd.purchaseCosts || [];
       const purchases = (suppliers.length > 0) ? suppliers : purchaseCosts;
+
+    // Si no hay compras cargadas en memoria, intentar cargar desde la API de Netcup VPS
+    if (purchases.length === 0 && currentCompany && currentCompany.id && currentCompany.selectedPeriod) {
+      fetchPurchasesFromNetcup(currentCompany.id, currentCompany.selectedPeriod);
+    }
       if (purchases.length > 0) {
         purchases.forEach(p => {
           totCogs += Number(p.total !== undefined ? p.total : (p.total_compra !== undefined ? p.total_compra : (p.amount || 0))) || 0;
@@ -8051,12 +8061,76 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // -------------------------------------------------------------------------
+  // INTEGRACIÓN ASÍNCRONA NETCUP VPS: CARGA DE COMPRAS E INSUMOS MASIVOS (API)
+  // -------------------------------------------------------------------------
+  let isFetchingNetcupPurchases = false;
+  let lastFetchedNetcupKey = '';
+
+  async function fetchPurchasesFromNetcup(companyId, periodKey, force = false) {
+    if (!companyId || !periodKey) return;
+    const fetchKey = `${companyId}_${periodKey}`;
+    if (!force && (isFetchingNetcupPurchases || lastFetchedNetcupKey === fetchKey)) return;
+
+    try {
+      isFetchingNetcupPurchases = true;
+      lastFetchedNetcupKey = fetchKey;
+      const apiUrl = `/api/compras?empresa_id=${encodeURIComponent(companyId)}&period_key=${encodeURIComponent(periodKey)}`;
+      const res = await fetch(apiUrl, { cache: 'no-cache' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && ((Array.isArray(data.suppliers) && data.suppliers.length > 0) || (Array.isArray(data.supplies) && data.supplies.length > 0))) {
+          if (!currentCompany.businessData) currentCompany.businessData = {};
+
+          let hasUpdated = false;
+          if (Array.isArray(data.suppliers) && data.suppliers.length > 0) {
+            // Solo aplicar si localmente no había o si vienen datos más ricos
+            if (!currentCompany.businessData.suppliers || currentCompany.businessData.suppliers.length === 0) {
+              currentCompany.businessData.suppliers = data.suppliers;
+              currentCompany.businessData.purchaseCosts = data.suppliers;
+              if (currentCompany.periods && currentCompany.selectedPeriod) {
+                currentCompany.periods[currentCompany.selectedPeriod].suppliers = data.suppliers;
+                currentCompany.periods[currentCompany.selectedPeriod].purchaseCosts = data.suppliers;
+              }
+              hasUpdated = true;
+            }
+          }
+
+          if (Array.isArray(data.supplies) && data.supplies.length > 0) {
+            if (!currentCompany.businessData.supplies || currentCompany.businessData.supplies.length === 0) {
+              currentCompany.businessData.supplies = data.supplies;
+              if (currentCompany.periods && currentCompany.selectedPeriod) {
+                currentCompany.periods[currentCompany.selectedPeriod].supplies = data.supplies;
+              }
+              hasUpdated = true;
+            }
+          }
+
+          if (hasUpdated) {
+            console.log(`[Netcup API] Compras cargadas para ${companyId} [${periodKey}]:`, data.recordsCount);
+            if (typeof renderPurchaseCostsModule === 'function') renderPurchaseCostsModule();
+            if (typeof renderSuppliesModule === 'function') renderSuppliesModule();
+          }
+        }
+      }
+    } catch (e) {
+      // Entorno offline o sin endpoint disponible, continúa normalmente
+    } finally {
+      isFetchingNetcupPurchases = false;
+    }
+  }
+
   // 6. Compras x Insumos
   function renderSuppliesModule() {
     const isPDSA = isCompanyPDSA();
     updateSuppliesTableHeaders(isPDSA);
 
     let supplies = (currentCompany && currentCompany.businessData) ? (currentCompany.businessData.supplies || []) : [];
+
+    // Si no hay insumos cargados en memoria, intentar cargar desde la API de Netcup VPS
+    if (supplies.length === 0 && currentCompany && currentCompany.id && currentCompany.selectedPeriod) {
+      fetchPurchasesFromNetcup(currentCompany.id, currentCompany.selectedPeriod);
+    }
 
     // Plazoleta de San Antonio: si había datos anteriores con proveedor/fecha del formato antiguo, limpiar para iniciar fresco
     if (isPDSA && supplies.length > 0 && supplies.some(s => s.fecha || (s.proveedor && s.proveedor !== 'General' && s.proveedor !== '—'))) {
@@ -11329,6 +11403,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Toma la misma información que sale en compras x proveedor
     const purchases = (suppliers.length > 0) ? suppliers : purchaseCosts;
 
+    // Si no hay compras cargadas en memoria, intentar cargar desde la API de Netcup VPS
+    if (purchases.length === 0 && currentCompany && currentCompany.id && currentCompany.selectedPeriod) {
+      fetchPurchasesFromNetcup(currentCompany.id, currentCompany.selectedPeriod);
+    }
+
     const tbody = document.getElementById('tbody-purchase-costs');
     const tfoot = document.getElementById('tfoot-purchase-costs');
     if (!tbody) return;
@@ -11839,6 +11918,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const suppliers = bd.suppliers || [];
       const purchaseCosts = bd.purchaseCosts || [];
       const purchases = (suppliers.length > 0) ? suppliers : purchaseCosts;
+
+    // Si no hay compras cargadas en memoria, intentar cargar desde la API de Netcup VPS
+    if (purchases.length === 0 && currentCompany && currentCompany.id && currentCompany.selectedPeriod) {
+      fetchPurchasesFromNetcup(currentCompany.id, currentCompany.selectedPeriod);
+    }
 
       if (purchases.length > 0) {
         purchases.forEach(p => {
