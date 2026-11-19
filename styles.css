@@ -5052,10 +5052,11 @@ body.theme-modern-slate .btn-view-mode.active {
   .auth-card.auth-card-gastronomic {
     position: relative !important;
     width: 100vw !important;
+    height: 100vh !important;
     min-height: 100vh !important;
-    min-height: 100dvh !important;
+    max-height: 100vh !important;
     margin: 0 !important;
-    padding: 24px 20px !important;
+    padding: 16px 24px !important;
     box-sizing: border-box !important;
     background: 
       linear-gradient(135deg, rgba(3, 7, 18, 0.40) 0%, rgba(3, 7, 18, 0.65) 50%, rgba(3, 7, 18, 0.85) 100%),
@@ -5064,8 +5065,7 @@ body.theme-modern-slate .btn-view-mode.active {
     flex-direction: row !important;
     justify-content: flex-end !important;
     align-items: center !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
+    overflow: hidden !important;
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
@@ -5074,9 +5074,9 @@ body.theme-modern-slate .btn-view-mode.active {
   /* Badges flotantes en la imagen izquierda */
   .auth-floating-badges-left {
     position: absolute;
-    top: 28px;
-    bottom: 28px;
-    left: 36px;
+    top: 24px;
+    bottom: 24px;
+    left: 32px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -5093,17 +5093,17 @@ body.theme-modern-slate .btn-view-mode.active {
     -webkit-backdrop-filter: blur(14px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: #f8fafc;
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 700;
-    letter-spacing: 1.2px;
-    padding: 8px 18px;
+    letter-spacing: 1.1px;
+    padding: 6px 16px;
     border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
   }
 
   .pill-dot-live {
     color: #10b981;
-    font-size: 10px;
+    font-size: 9px;
     animation: pulseGreen 2s infinite ease-in-out;
   }
 
@@ -5115,8 +5115,8 @@ body.theme-modern-slate .btn-view-mode.active {
   /* Panel contenedor y tarjeta flotante */
   .auth-card-gastronomic .auth-forms-panel {
     width: 100% !important;
-    max-width: 480px !important;
-    margin: 0 4.5vw 0 auto !important;
+    max-width: 430px !important;
+    margin: 0 4vw 0 auto !important;
     padding: 0 !important;
     z-index: 10;
     display: flex !important;
@@ -5130,132 +5130,141 @@ body.theme-modern-slate .btn-view-mode.active {
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-radius: 24px !important;
-    box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
-    padding: 32px 34px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+    padding: 20px 28px 16px 28px !important;
     box-sizing: border-box !important;
     color: #ffffff !important;
     position: relative !important;
     width: 100% !important;
+    max-height: calc(100vh - 32px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
   }
 
   /* Encabezado Corporativo dentro de la tarjeta */
   .auth-card-brand-header {
     text-align: center;
-    margin-bottom: 18px;
+    margin-bottom: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
   .auth-logo-circle-glow {
-    width: 74px;
-    height: 74px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, rgba(15, 23, 42, 0.85) 70%);
     border: 2px solid #10b981;
-    box-shadow: 0 0 24px rgba(16, 185, 129, 0.35);
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
   }
 
   .auth-brand-logo-img {
-    width: 52px;
-    height: 52px;
+    width: 36px;
+    height: 36px;
     object-fit: contain;
   }
 
   .auth-brand-eyebrow {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 800;
     color: #10b981;
     letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
+    line-height: 1;
   }
 
   .auth-brand-title {
-    font-size: 25px;
+    font-size: 21px;
     font-weight: 900;
     color: #ffffff;
-    letter-spacing: 0.8px;
-    margin: 0 0 6px 0;
+    letter-spacing: 0.6px;
+    margin: 2px 0 4px 0;
     font-family: 'Inter', sans-serif;
+    line-height: 1.1;
   }
 
   .auth-version-pill {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     background: rgba(6, 182, 212, 0.12);
     border: 1px solid rgba(6, 182, 212, 0.35);
     color: #38bdf8;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    padding: 3px 11px;
-    border-radius: 14px;
-    margin-bottom: 6px;
+    padding: 2px 9px;
+    border-radius: 12px;
+    margin-bottom: 4px;
+    line-height: 1.2;
   }
 
   .pill-dot-cyan {
     color: #06b6d4;
-    font-size: 9px;
+    font-size: 8px;
   }
 
   .auth-brand-slogan {
-    font-size: 12px;
+    font-size: 11px;
     font-style: italic;
     color: #94a3b8;
-    margin: 0 0 14px 0;
-    line-height: 1.4;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
   }
 
   /* Títulos de sección */
   .auth-glass-card .view-header {
     text-align: center;
-    margin-bottom: 18px;
+    margin-bottom: 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding-bottom: 14px;
+    padding-bottom: 8px;
   }
 
   .auth-glass-card .header-pretitle-web {
     display: block;
-    font-size: 10.5px;
+    font-size: 9.5px;
     font-weight: 800;
-    letter-spacing: 1.5px;
+    letter-spacing: 1.4px;
     color: #06b6d4;
     text-transform: uppercase;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
   }
 
   .auth-glass-card .view-title {
-    font-size: 20px;
+    font-size: 17px;
     font-weight: 800;
     color: #ffffff;
-    margin: 0 0 4px 0;
+    margin: 0 0 2px 0;
     font-family: 'Inter', sans-serif;
+    line-height: 1.1;
   }
 
   .auth-glass-card .view-subtitle {
-    font-size: 12px;
+    font-size: 11px;
     color: #94a3b8;
     margin: 0;
+    line-height: 1.2;
   }
 
   /* Formulario e inputs */
   .auth-glass-card .form-group {
-    margin-bottom: 14px;
+    margin-bottom: 9px;
     text-align: left;
     width: 100%;
   }
 
   .auth-glass-card .form-group label {
-    font-size: 12.5px;
+    font-size: 11.5px;
     font-weight: 600;
     color: #e2e8f0;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     display: block;
   }
 
@@ -5267,15 +5276,15 @@ body.theme-modern-slate .btn-view-mode.active {
 
   .auth-glass-card .input-icon-wrapper input {
     width: 100%;
-    height: 46px;
-    border-radius: 12px;
+    height: 38px;
+    border-radius: 10px;
     border: 1.5px solid rgba(255, 255, 255, 0.15);
     background: #ffffff !important;
     color: #0f172a !important;
-    font-size: 13.5px;
+    font-size: 12.5px;
     font-weight: 500;
-    padding-left: 42px;
-    padding-right: 42px;
+    padding-left: 38px;
+    padding-right: 38px;
     box-sizing: border-box;
     transition: all 0.2s ease;
   }
@@ -5289,24 +5298,24 @@ body.theme-modern-slate .btn-view-mode.active {
 
   .auth-glass-card .input-icon-wrapper .input-icon {
     position: absolute;
-    left: 14px;
+    left: 12px;
     color: #0284c7;
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .auth-glass-card .toggle-password {
     position: absolute;
-    right: 12px;
+    right: 10px;
     background: none;
     border: none;
     color: #64748b;
     cursor: pointer;
-    padding: 6px;
-    font-size: 14px;
+    padding: 4px;
+    font-size: 13px;
   }
 
   .auth-glass-card .field-action {
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     color: #38bdf8;
     text-decoration: none;
     font-weight: 600;
@@ -5322,40 +5331,40 @@ body.theme-modern-slate .btn-view-mode.active {
   .auth-glass-card .btn-login-gradient {
     background: linear-gradient(90deg, #1d4ed8 0%, #06b6d4 100%) !important;
     border: none !important;
-    border-radius: 12px !important;
-    height: 48px !important;
+    border-radius: 10px !important;
+    height: 40px !important;
     color: #ffffff !important;
-    font-size: 13.5px !important;
+    font-size: 12.5px !important;
     font-weight: 800 !important;
-    letter-spacing: 1px !important;
+    letter-spacing: 0.8px !important;
     text-transform: uppercase !important;
-    box-shadow: 0 6px 20px rgba(29, 78, 216, 0.45) !important;
+    box-shadow: 0 4px 16px rgba(29, 78, 216, 0.40) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 10px !important;
+    gap: 8px !important;
     cursor: pointer !important;
-    margin-top: 14px !important;
+    margin-top: 10px !important;
     width: 100% !important;
     transition: all 0.25s ease !important;
   }
 
   .auth-glass-card .btn-login-gradient:hover {
     transform: translateY(-2px) !important;
-    box-shadow: 0 10px 26px rgba(6, 182, 212, 0.55) !important;
+    box-shadow: 0 8px 22px rgba(6, 182, 212, 0.50) !important;
     filter: brightness(1.08);
   }
 
   /* Divider y Redes */
   .auth-glass-card .auth-social-footer {
-    margin-top: 20px;
+    margin-top: 10px;
     text-align: center;
   }
 
   .auth-glass-card .auth-divider-line {
     position: relative;
     text-align: center;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
 
   .auth-glass-card .auth-divider-line::before {
@@ -5373,10 +5382,10 @@ body.theme-modern-slate .btn-view-mode.active {
     position: relative;
     z-index: 2;
     background: #0b1426;
-    padding: 0 12px;
-    font-size: 10.5px;
+    padding: 0 10px;
+    font-size: 9.5px;
     font-weight: 700;
-    letter-spacing: 1.2px;
+    letter-spacing: 1px;
     text-transform: uppercase;
     color: #64748b;
   }
@@ -5384,12 +5393,12 @@ body.theme-modern-slate .btn-view-mode.active {
   .auth-glass-card .auth-social-icons {
     display: flex;
     justify-content: center;
-    gap: 14px;
+    gap: 12px;
   }
 
   .auth-glass-card .social-icon-btn {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -5397,7 +5406,7 @@ body.theme-modern-slate .btn-view-mode.active {
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.12);
     color: #ffffff;
-    font-size: 16px;
+    font-size: 13px;
     text-decoration: none;
     transition: all 0.2s ease;
   }
@@ -5407,7 +5416,7 @@ body.theme-modern-slate .btn-view-mode.active {
     border-color: #25d366;
     color: #ffffff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
   }
 
   .auth-glass-card .social-icon-btn.email:hover {
@@ -5415,14 +5424,15 @@ body.theme-modern-slate .btn-view-mode.active {
     border-color: #0284c7;
     color: #ffffff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
   }
 
   .auth-glass-card .recaptcha-legal-badge {
-    margin-top: 14px;
-    font-size: 11px;
+    margin-top: 8px;
+    font-size: 10px;
     color: #64748b;
     text-align: center;
+    line-height: 1.3;
   }
 
   .auth-glass-card .recaptcha-legal-badge a {
@@ -5431,17 +5441,17 @@ body.theme-modern-slate .btn-view-mode.active {
   }
 
   .auth-glass-card .link-plans-landing {
-    font-size: 0.80rem;
+    font-size: 0.72rem;
     font-weight: 700;
     color: #38bdf8;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
+    gap: 5px;
+    padding: 4px 10px;
     background: rgba(56, 189, 248, 0.08);
     border: 1px solid rgba(56, 189, 248, 0.25);
-    border-radius: 20px;
+    border-radius: 16px;
     transition: all 0.2s;
   }
 
@@ -5456,7 +5466,8 @@ body.theme-modern-slate .btn-view-mode.active {
     #auth-section.auth-card-gastronomic,
     .auth-card.auth-card-gastronomic {
       justify-content: center !important;
-      padding: 16px !important;
+      padding: 12px !important;
+      overflow-y: auto !important;
     }
     .auth-floating-badges-left {
       display: none !important;
@@ -5466,8 +5477,9 @@ body.theme-modern-slate .btn-view-mode.active {
       max-width: 100% !important;
     }
     .auth-glass-card {
-      padding: 24px 20px !important;
-      border-radius: 18px !important;
+      padding: 18px 16px !important;
+      border-radius: 16px !important;
+      max-height: none !important;
     }
   }
 }

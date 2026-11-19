@@ -36,7 +36,7 @@
   </script>
   <!-- Google reCAPTCHA v3 SDK -->
   <script src="https://www.google.com/recaptcha/api.js?render=6LcBDRQuAAAAANfXf6euPklvVkXs6nxYszlE9obm"></script>
-  <link rel="stylesheet" href="styles.css?v=1.0.2">
+  <link rel="stylesheet" href="styles.css?v=1.0.4">
   <script>
     (function() {
       var isNative = Boolean(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
@@ -5856,7 +5856,7 @@
         }
       });
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.3').then((reg) => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.4').then((reg) => {
           reg.update();
         }).catch(err => console.log('SW reg note:', err));
       });
