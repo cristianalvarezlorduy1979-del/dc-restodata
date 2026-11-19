@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dc-restaurantes-v1_0_2';
+const CACHE_NAME = 'dc-restaurantes-v1_0_3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -10,7 +10,8 @@ const STATIC_ASSETS = [
   '/assets/icon-192.png',
   '/assets/icon-512.png',
   '/assets/icon-maskable.png',
-  '/assets/logo-emblema.png'
+  '/assets/logo-emblema.png',
+  '/assets/login_backgrounds/propuesta_4_cocina_abierta.jpg'
 ];
 
 self.addEventListener('install', (event) => {

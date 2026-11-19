@@ -36,7 +36,7 @@
   </script>
   <!-- Google reCAPTCHA v3 SDK -->
   <script src="https://www.google.com/recaptcha/api.js?render=6LcBDRQuAAAAANfXf6euPklvVkXs6nxYszlE9obm"></script>
-  <link rel="stylesheet" href="styles.css?v=1.0.1">
+  <link rel="stylesheet" href="styles.css?v=1.0.2">
   <script>
     (function() {
       var isNative = Boolean(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
@@ -67,148 +67,110 @@
     <!-- ======================================================================
          SECCIÓN DE AUTENTICACIÓN (LOGIN Y REGISTRO DE EMPRESA)
          ====================================================================== -->
-    <section id="auth-section" class="auth-card">
+    <section id="auth-section" class="auth-card auth-card-gastronomic">
       
-      <!-- HERO PANEL IZQUIERDO (SOLO EN VERSIÓN WEB DE ESCRITORIO - MODELO REFERENCIA) -->
-      <div class="auth-hero-panel" id="auth-hero-panel">
-        <div class="hero-decorative-blobs">
-          <span class="hero-blob blob-1"></span>
-          <span class="hero-blob blob-2"></span>
-          <span class="hero-blob blob-3"></span>
+      <!-- BADGES FLOTANTES EXTERNOS (LADO IZQUIERDO SOBRE LA IMAGEN DE FONDO) -->
+      <div class="auth-floating-badges-left">
+        <div class="auth-floating-pill pill-top">
+          <span class="pill-dot-live">●</span> ECOSISTEMA DC ASESORÍAS
         </div>
-        <div class="hero-top-bar">
-          <span class="hero-ecosystem-tag"><span class="hero-status-dot">●</span> ECOSISTEMA DC ASESORÍAS</span>
-          <span class="hero-cloud-pill"><i class="fa-solid fa-cloud"></i> Nube Sincronizada</span>
-        </div>
-        <div class="hero-inner-content">
-          <div class="hero-brand-compact">
-            <img src="assets/logo-emblema.png?v=6.0" alt="DC RestoData" class="hero-brand-mini-logo">
-            <div style="text-align: left;">
-              <span class="hero-eyebrow">DC ASESORÍAS</span>
-              <h2 class="hero-main-heading"><span class="app-brand-name uppercase" data-app-name data-uppercase="true">DC RESTODATA</span></h2>
-            </div>
-          </div>
-          <p class="hero-description">"Innovación, control y crecimiento en tu negocio." Control integral de ventas, costos y rentabilidad en tu PC y Celular.</p>
-
-          <!-- COMPOSICIÓN DE DISPOSITIVOS: LAPTOP + SMARTPHONE REAL (PROPUESTA 1 OFICIAL) -->
-          <div class="devices-composition-wrap">
-            <!-- Pantalla PC de Fondo con captura de Dashboard Natal Coffee -->
-            <div class="desktop-device-frame">
-              <div class="desktop-top-bar">
-                <span class="dot dot-red"></span>
-                <span class="dot dot-yellow"></span>
-                <span class="dot dot-green"></span>
-                <span class="desktop-bar-url">
-                  <i class="fa-solid fa-lock" style="font-size:0.55rem;"></i> dcasesorias-col.web.app • Reportes Gráficos
-                </span>
-              </div>
-              <img src="assets/login_mockups/dashboard_kpis.jpg" alt="Dashboard Natal Coffee" class="desktop-img-content">
-            </div>
-
-            <!-- Smartphone en Primer Plano con captura de App Móvil -->
-            <div class="smartphone-device-frame">
-              <div class="phone-top-island">
-                <div class="phone-camera-dot"></div>
-              </div>
-              <img src="assets/login_mockups/mobile_app_screen.jpg" alt="App Celular DC RestoData" class="phone-img-content">
-              <div class="phone-bottom-bar">
-                <div class="phone-home-indicator"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="hero-bottom-bar">
-          <span class="hero-status-left"><i class="fa-solid fa-shield-halved" style="color:var(--accent-gold);margin-right:4px;"></i> Auditoría Financiera y Culinaria</span>
-          <span class="hero-status-right"><span class="hero-status-dot">●</span> <span class="app-brand-full" data-app-name-version>DC RestoData v1.0</span></span>
+        <div class="auth-floating-pill pill-bottom">
+          <i class="fa-solid fa-fire-burner" style="margin-right: 6px; color: #f59e0b;"></i> Cocina & Operación Gastronómica
         </div>
       </div>
 
       <!-- PANEL DERECHO DE FORMULARIOS -->
       <div class="auth-forms-panel">
         
-        <!-- LOGO Y ENCABEZADO CORPORATIVO (VISIBLE EN MÓVIL Y REGISTRO) -->
-        <header class="brand-header">
-          <div class="logo-wrapper">
-            <img src="assets/logo-emblema.png?v=6.0" alt="DC RestoData" class="brand-logo-circle">
-          </div>
-          <h1 class="brand-title"><span class="app-brand-name uppercase" data-app-name data-uppercase="true">DC RESTODATA</span> <span class="app-version-badge" data-app-version>v1.0</span></h1>
-          <p class="brand-slogan">"TU ALIADO EN LA GESTION DE TU NEGOCIO"</p>
-        </header>
+        <!-- TARJETA FLOTANTE GLASSMORPHISM OSCURA (MODELO DC PROCESOS / RESTODATA) -->
+        <div class="auth-glass-card">
 
-        <!-- VISTA 1: INICIO DE SESIÓN -->
-        <div id="login-view" class="form-view active">
-          <div class="view-header login-header-clean">
-            <span class="header-pretitle-web">Sistema Integral Gastronómico</span>
-            <h2 class="view-title">Iniciar Sesión</h2>
-            <p class="view-subtitle">Accede según el perfil asignado para tu empresa</p>
+          <!-- ENCABEZADO CORPORATIVO INTEGRADO DENTRO DE LA TARJETA -->
+          <div class="auth-card-brand-header">
+            <div class="auth-logo-circle-glow">
+              <img src="assets/logo-emblema.png?v=6.0" alt="DC RestoData" class="auth-brand-logo-img">
+            </div>
+            <span class="auth-brand-eyebrow">DC ASESORÍAS</span>
+            <h1 class="auth-brand-title"><span class="app-brand-name uppercase" data-app-name data-uppercase="true">DC RESTODATA</span></h1>
+            <div class="auth-version-pill"><span class="pill-dot-cyan">●</span> <span class="app-brand-full" data-app-name-version>DC RestoData v1.0</span></div>
+            <p class="auth-brand-slogan">"Innovación, control y crecimiento en tu negocio."</p>
           </div>
 
-          <form id="login-form" novalidate>
-            <div class="form-group">
-              <label for="login-email">Correo Electrónico</label>
-              <div class="input-icon-wrapper">
-                <i class="fa-regular fa-envelope input-icon"></i>
-                <input 
-                  type="email" 
-                  id="login-email" 
-                  name="email" 
-                  placeholder="dcasesorias@gmail.com o correo de tu empresa" 
-                  required 
-                  autocomplete="email"
-                >
-              </div>
-              <span class="field-hint">Este correo está amarrado al nombre de tu empresa</span>
+          <!-- VISTA 1: INICIO DE SESIÓN -->
+          <div id="login-view" class="form-view active">
+            <div class="view-header login-header-clean">
+              <span class="header-pretitle-web">SISTEMA INTEGRAL GASTRONÓMICO</span>
+              <h2 class="view-title">Iniciar Sesión</h2>
+              <p class="view-subtitle">Accede a la plataforma con tu usuario o correo electrónico</p>
             </div>
 
-            <div class="form-group">
-              <div class="label-with-action" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <label for="login-password">Contraseña</label>
-                <a href="#" id="link-forgot-password" class="field-action" style="font-size: 0.78rem; color: #0284c7; text-decoration: none; font-weight: 600;" title="Instrucciones para recuperar tu contraseña de acceso">¿Olvidaste tu contraseña?</a>
+            <form id="login-form" novalidate>
+              <div class="form-group">
+                <label for="login-email">Correo Electrónico o Usuario <span class="req">*</span></label>
+                <div class="input-icon-wrapper">
+                  <i class="fa-regular fa-envelope input-icon"></i>
+                  <input 
+                    type="email" 
+                    id="login-email" 
+                    name="email" 
+                    placeholder="dcasesorias@gmail.com o usuario" 
+                    required 
+                    autocomplete="email"
+                  >
+                </div>
               </div>
-              <div class="input-icon-wrapper">
-                <i class="fa-solid fa-lock input-icon"></i>
-                <input 
-                  type="password" 
-                  id="login-password" 
-                  name="password" 
-                  placeholder="••••••" 
-                  required
-                  autocomplete="current-password"
-                >
-                <button type="button" class="toggle-password" data-target="login-password" title="Mostrar/ocultar contraseña">
-                  <i class="fa-regular fa-eye"></i>
-                </button>
+
+              <div class="form-group">
+                <div class="label-with-action" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <label for="login-password">Contraseña <span class="req">*</span></label>
+                  <a href="#" id="link-forgot-password" class="field-action" title="Instrucciones para recuperar tu contraseña de acceso">¿Olvidaste tu contraseña?</a>
+                </div>
+                <div class="input-icon-wrapper">
+                  <i class="fa-solid fa-lock input-icon"></i>
+                  <input 
+                    type="password" 
+                    id="login-password" 
+                    name="password" 
+                    placeholder="••••••" 
+                    required
+                    autocomplete="current-password"
+                  >
+                  <button type="button" class="toggle-password" data-target="login-password" title="Mostrar/ocultar contraseña">
+                    <i class="fa-regular fa-eye"></i>
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <button type="submit" class="btn btn-primary btn-block btn-login-gradient">
-              <span>INGRESAR AL SISTEMA</span>
-              <i class="fa-solid fa-arrow-right"></i>
-            </button>
-            <div class="recaptcha-legal-badge" style="margin-top: 12px; font-size: 11px; color: #94a3b8; text-align: center; line-height: 1.4;">
-              <i class="fa-solid fa-shield-halved" style="color: #0284c7; margin-right: 4px;"></i> Protegido con Google reCAPTCHA v3 · <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" style="color: #64748b; text-decoration: underline;">Privacidad</a> y <a href="https://policies.google.com/terms" target="_blank" rel="noopener" style="color: #64748b; text-decoration: underline;">Condiciones</a>
-            </div>
-          </form>
+              <button type="submit" class="btn btn-primary btn-block btn-login-gradient">
+                <span>INGRESAR AL SISTEMA</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
 
-          <!-- PIE CON REDES / CONTACTO EN VERSIÓN WEB (MODELO SOLICITADO) -->
-          <div class="auth-social-footer">
-            <div class="auth-divider-line"><span>o conéctate con nosotros</span></div>
-            <div class="auth-social-icons">
-              <a href="https://wa.me/573165443285?text=Hola%20DC%20Asesor%C3%ADas,%20deseo%20m%C3%A1s%20informaci%C3%B3n%20sobre%20DC%20Restaurantes" target="_blank" title="WhatsApp: 316 544 3285" class="social-icon-btn whatsapp"><i class="fa-brands fa-whatsapp"></i></a>
-              <a href="mailto:dcasesoriascol@gmail.com" title="Correo: dcasesoriascol@gmail.com" class="social-icon-btn email"><i class="fa-solid fa-envelope"></i></a>
-            </div>
+              <!-- PIE CON REDES / CONTACTO EN VERSIÓN WEB -->
+              <div class="auth-social-footer">
+                <div class="auth-divider-line"><span>O CONÉCTATE CON NOSOTROS</span></div>
+                <div class="auth-social-icons">
+                  <a href="https://wa.me/573165443285?text=Hola%20DC%20Asesor%C3%ADas,%20deseo%20m%C3%A1s%20informaci%C3%B3n%20sobre%20DC%20RestoData" target="_blank" title="WhatsApp: 316 544 3285" class="social-icon-btn whatsapp"><i class="fa-brands fa-whatsapp"></i></a>
+                  <a href="mailto:dcasesoriascol@gmail.com" title="Correo: dcasesoriascol@gmail.com" class="social-icon-btn email"><i class="fa-solid fa-envelope"></i></a>
+                </div>
+              </div>
+
+              <div class="recaptcha-legal-badge">
+                <i class="fa-solid fa-shield-halved" style="color: #06b6d4; margin-right: 4px;"></i> Protegido con Google reCAPTCHA v3 · <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacidad</a> y <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Condiciones</a>
+              </div>
+
+              <div style="margin-top: 14px; text-align: center;">
+                <a href="landing.html" target="_blank" class="link-plans-landing">
+                  <i class="fa-solid fa-globe"></i>
+                  <span>¿Eres nuevo? Conoce nuestros Planes y Servicios</span>
+                  <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px;"></i>
+                </a>
+              </div>
+            </form>
           </div>
-            <div style="margin-top: 14px; text-align: center;">
-              <a href="landing.html" target="_blank" style="font-size: 0.80rem; font-weight: 700; color: #0284c7; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(2, 132, 199, 0.08); border: 1px solid rgba(2, 132, 199, 0.25); border-radius: 20px; transition: all 0.2s;">
-                <i class="fa-solid fa-globe text-gold"></i>
-                <span>¿Eres nuevo? Conoce nuestros Planes y Servicios</span>
-                <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px;"></i>
-              </a>
-            </div>
-        </div>
 
-      <!-- VISTA 2: CREAR EMPRESA -->
-      <div id="register-view" class="form-view hidden">
+          <!-- VISTA 2: CREAR EMPRESA -->
+          <div id="register-view" class="form-view hidden">
         <div class="view-header register-view-header">
           <div class="view-header-left">
             <div class="badge-tag"><i class="fa-solid fa-briefcase"></i> Registro Empresarial</div>
@@ -613,7 +575,8 @@
             </div>
           </div>
         </form>
-      </div>
+      </div><!-- /#register-view -->
+      </div><!-- /.auth-glass-card -->
       </div><!-- /.auth-forms-panel -->
 
     </section>
@@ -5893,7 +5856,7 @@
         }
       });
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.2').then((reg) => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.3').then((reg) => {
           reg.update();
         }).catch(err => console.log('SW reg note:', err));
       });
