@@ -6222,21 +6222,21 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       // Formato estándar de 15 columnas para las demás empresas
       colgroup.innerHTML = `
-        <col style="width:70px; min-width:64px">
-        <col style="width:68px; min-width:60px">
-        <col style="width:92px">
-        <col style="width:86px">
-        <col style="width:86px">
-        <col style="width:70px">
-        <col style="width:82px">
-        <col style="width:96px">
-        <col style="width:76px">
-        <col style="width:100px">
-        <col style="width:82px">
-        <col style="width:54px">
-        <col style="width:54px">
-        <col style="width:84px">
-        <col style="width:84px">
+        <col style="width:5.2%">
+        <col style="width:5.0%">
+        <col style="width:9.5%">
+        <col style="width:8.0%">
+        <col style="width:9.0%">
+        <col style="width:4.4%">
+        <col style="width:6.4%">
+        <col style="width:9.5%">
+        <col style="width:5.2%">
+        <col style="width:10.0%">
+        <col style="width:6.4%">
+        <col style="width:4.0%">
+        <col style="width:4.0%">
+        <col style="width:6.7%">
+        <col style="width:6.7%">
       `;
       thead.innerHTML = `
         <tr class="thead-group-row">
