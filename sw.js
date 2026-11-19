@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dc-restaurantes-v1_0_1';
+const CACHE_NAME = 'dc-restaurantes-v1_0_2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -39,8 +39,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
-  // No interceptar peticiones externas (Firebase Firestore, Google APIs, CDNs)
-  if (url.origin !== self.location.origin) return;
+  // No interceptar peticiones externas ni llamadas a API backend (Firebase Firestore, Google APIs, CDNs, Netcup API)
+  if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
 
   event.respondWith(
     fetch(event.request)

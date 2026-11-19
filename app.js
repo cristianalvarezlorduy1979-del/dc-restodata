@@ -2172,6 +2172,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }, 50);
     }
+
+    // Si se activa Compras por Proveedor o Costos de Compras, refrescar y cargar desde Netcup si está vacío
+    if (targetTabId === 'tab-5-compras-proveedor' || targetTabId === 'tab-11-costos-compras') {
+      setTimeout(() => {
+        if (typeof renderSuppliersModule === 'function') renderSuppliersModule();
+        if (typeof renderPurchaseCostsModule === 'function') renderPurchaseCostsModule();
+        if (currentCompany && currentCompany.id && currentCompany.selectedPeriod &&
+            (!currentCompany.businessData || !currentCompany.businessData.suppliers || currentCompany.businessData.suppliers.length === 0)) {
+          if (typeof fetchPurchasesFromNetcup === 'function') fetchPurchasesFromNetcup(currentCompany.id, currentCompany.selectedPeriod);
+        }
+      }, 50);
+    }
+
+    // Si se activa Compras por Insumos, refrescar y cargar desde Netcup si está vacío
+    if (targetTabId === 'tab-6-compras-insumos') {
+      setTimeout(() => {
+        if (typeof renderSuppliesModule === 'function') renderSuppliesModule();
+        if (currentCompany && currentCompany.id && currentCompany.selectedPeriod &&
+            (!currentCompany.businessData || !currentCompany.businessData.supplies || currentCompany.businessData.supplies.length === 0)) {
+          if (typeof fetchPurchasesFromNetcup === 'function') fetchPurchasesFromNetcup(currentCompany.id, currentCompany.selectedPeriod);
+        }
+      }, 50);
+    }
   }
 
   function configureCompanyTabs(company) {
@@ -2918,7 +2941,20 @@ document.addEventListener('DOMContentLoaded', () => {
       snap.forEach(pDoc => {
         const pData = pDoc.data();
         if (pData) {
+          // Preservar compras e insumos traídos desde Netcup VPS si Firestore no los contiene (evitar sobreescritura vacía)
+          const prevPeriod = (currentCompany.periods && currentCompany.periods[pDoc.id]) ? currentCompany.periods[pDoc.id] : {};
+          const existingSuppliers = (prevPeriod.suppliers && prevPeriod.suppliers.length > 0) ? prevPeriod.suppliers : null;
+          const existingSupplies = (prevPeriod.supplies && prevPeriod.supplies.length > 0) ? prevPeriod.supplies : null;
+
           currentCompany.periods[pDoc.id] = pData;
+
+          if (existingSuppliers && (!pData.suppliers || pData.suppliers.length === 0)) {
+            currentCompany.periods[pDoc.id].suppliers = existingSuppliers;
+            currentCompany.periods[pDoc.id].purchaseCosts = existingSuppliers;
+          }
+          if (existingSupplies && (!pData.supplies || pData.supplies.length === 0)) {
+            currentCompany.periods[pDoc.id].supplies = existingSupplies;
+          }
           hasChanges = true;
         }
       });
@@ -2949,6 +2985,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectChartPeriod = document.getElementById('select-chart-period');
         if (typeof renderChartsModule === 'function' && selectChartPeriod) {
           renderChartsModule(selectChartPeriod.value);
+        }
+
+        // Si el período activo no tiene compras en memoria, consultar a Netcup VPS
+        if (currentCompany && currentCompany.id && currentCompany.selectedPeriod &&
+            (!currentCompany.businessData.suppliers || currentCompany.businessData.suppliers.length === 0) &&
+            typeof fetchPurchasesFromNetcup === 'function') {
+          fetchPurchasesFromNetcup(currentCompany.id, currentCompany.selectedPeriod);
         }
       }
     }, err => console.warn('Aviso sincronización subcolección periods:', err));
@@ -8084,48 +8127,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       isFetchingNetcupPurchases = true;
-      lastFetchedNetcupKey = fetchKey;
-      const apiUrl = `/api/compras?empresa_id=${encodeURIComponent(companyId)}&period_key=${encodeURIComponent(periodKey)}`;
+      const apiUrl = `/api/compras?empresa_id=${encodeURIComponent(companyId)}&period_key=${encodeURIComponent(periodKey)}&_t=${Date.now()}`;
       const res = await fetch(apiUrl, { cache: 'no-cache' });
       if (res.ok) {
         const data = await res.json();
-        if (data && data.success && ((Array.isArray(data.suppliers) && data.suppliers.length > 0) || (Array.isArray(data.supplies) && data.supplies.length > 0))) {
+        const hasSuppliers = Array.isArray(data.suppliers) && data.suppliers.length > 0;
+        const hasSupplies = Array.isArray(data.supplies) && data.supplies.length > 0;
+
+        if (data && data.success && (hasSuppliers || hasSupplies)) {
+          lastFetchedNetcupKey = fetchKey;
           if (!currentCompany.businessData) currentCompany.businessData = {};
+          if (!currentCompany.periods) currentCompany.periods = {};
+          if (!currentCompany.periods[periodKey]) currentCompany.periods[periodKey] = {};
 
           let hasUpdated = false;
-          if (Array.isArray(data.suppliers) && data.suppliers.length > 0) {
-            // Solo aplicar si localmente no había o si vienen datos más ricos
-            if (!currentCompany.businessData.suppliers || currentCompany.businessData.suppliers.length === 0) {
+          if (hasSuppliers) {
+            currentCompany.periods[periodKey].suppliers = data.suppliers;
+            currentCompany.periods[periodKey].purchaseCosts = data.suppliers;
+            if (currentCompany.selectedPeriod === periodKey) {
               currentCompany.businessData.suppliers = data.suppliers;
               currentCompany.businessData.purchaseCosts = data.suppliers;
-              if (currentCompany.periods && currentCompany.selectedPeriod) {
-                currentCompany.periods[currentCompany.selectedPeriod].suppliers = data.suppliers;
-                currentCompany.periods[currentCompany.selectedPeriod].purchaseCosts = data.suppliers;
-              }
-              hasUpdated = true;
             }
+            hasUpdated = true;
           }
 
-          if (Array.isArray(data.supplies) && data.supplies.length > 0) {
-            if (!currentCompany.businessData.supplies || currentCompany.businessData.supplies.length === 0) {
+          if (hasSupplies) {
+            currentCompany.periods[periodKey].supplies = data.supplies;
+            if (currentCompany.selectedPeriod === periodKey) {
               currentCompany.businessData.supplies = data.supplies;
-              if (currentCompany.periods && currentCompany.selectedPeriod) {
-                currentCompany.periods[currentCompany.selectedPeriod].supplies = data.supplies;
-              }
-              hasUpdated = true;
             }
+            hasUpdated = true;
           }
 
           if (hasUpdated) {
-            console.log(`[Netcup API] Compras cargadas para ${companyId} [${periodKey}]:`, data.recordsCount);
-            if (typeof renderSuppliersModule === 'function') renderSuppliersModule();
-            if (typeof renderPurchaseCostsModule === 'function') renderPurchaseCostsModule();
-            if (typeof renderSuppliesModule === 'function') renderSuppliesModule();
+            console.log(`[Netcup API] Compras cargadas para ${companyId} [${periodKey}]:`, data.recordsCount || { suppliers: (data.suppliers || []).length, supplies: (data.supplies || []).length });
+            try {
+              sessionStorage.setItem(SESSION_KEY, JSON.stringify({ company: currentCompany, role: currentUserRole }));
+            } catch (eSession) {}
+
+            if (currentCompany.selectedPeriod === periodKey) {
+              if (typeof renderSuppliersModule === 'function') renderSuppliersModule();
+              if (typeof renderPurchaseCostsModule === 'function') renderPurchaseCostsModule();
+              if (typeof renderSuppliesModule === 'function') renderSuppliesModule();
+              if (typeof renderPnlModule === 'function') renderPnlModule();
+            }
           }
         }
       }
     } catch (e) {
-      // Entorno offline o sin endpoint disponible, continúa normalmente
+      console.warn('[Netcup API] Aviso al consultar compras:', e);
     } finally {
       isFetchingNetcupPurchases = false;
     }

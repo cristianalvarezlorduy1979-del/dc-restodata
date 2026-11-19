@@ -5881,7 +5881,7 @@
   <!-- Firebase SDK v10 Compat (Sincronización en la Nube Firestore en Tiempo Real) -->
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
-  <script src="app.js?v=1.0.1"></script>
+  <script src="app.js?v=1.0.2"></script>
   <script>
     // 1. Registro de Service Worker PWA con auto-actualización inmediata
     if ('serviceWorker' in navigator) {
@@ -5893,7 +5893,7 @@
         }
       });
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.1').then((reg) => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.2').then((reg) => {
           reg.update();
         }).catch(err => console.log('SW reg note:', err));
       });
