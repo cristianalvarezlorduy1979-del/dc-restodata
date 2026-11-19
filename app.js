@@ -7843,7 +7843,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const isPDSA = isCompanyPDSA();
     updateSuppliersTableHeaders(isPDSA);
 
-    let suppliers = (currentCompany && currentCompany.businessData) ? (currentCompany.businessData.suppliers || []) : [];
+    let suppliers = [];
+    if (currentCompany) {
+      if (currentCompany.businessData && Array.isArray(currentCompany.businessData.suppliers) && currentCompany.businessData.suppliers.length > 0) {
+        suppliers = currentCompany.businessData.suppliers;
+      } else if (currentCompany.periods && currentCompany.selectedPeriod && currentCompany.periods[currentCompany.selectedPeriod] && Array.isArray(currentCompany.periods[currentCompany.selectedPeriod].suppliers) && currentCompany.periods[currentCompany.selectedPeriod].suppliers.length > 0) {
+        suppliers = currentCompany.periods[currentCompany.selectedPeriod].suppliers;
+        if (currentCompany.businessData) currentCompany.businessData.suppliers = suppliers;
+      }
+    }
 
     // Si no hay compras cargadas en memoria, intentar cargar desde la API de Netcup VPS
     if (suppliers.length === 0 && currentCompany && currentCompany.id && currentCompany.selectedPeriod) {
@@ -8189,7 +8197,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const isPDSA = isCompanyPDSA();
     updateSuppliesTableHeaders(isPDSA);
 
-    let supplies = (currentCompany && currentCompany.businessData) ? (currentCompany.businessData.supplies || []) : [];
+    let supplies = [];
+    if (currentCompany) {
+      if (currentCompany.businessData && Array.isArray(currentCompany.businessData.supplies) && currentCompany.businessData.supplies.length > 0) {
+        supplies = currentCompany.businessData.supplies;
+      } else if (currentCompany.periods && currentCompany.selectedPeriod && currentCompany.periods[currentCompany.selectedPeriod] && Array.isArray(currentCompany.periods[currentCompany.selectedPeriod].supplies) && currentCompany.periods[currentCompany.selectedPeriod].supplies.length > 0) {
+        supplies = currentCompany.periods[currentCompany.selectedPeriod].supplies;
+        if (currentCompany.businessData) currentCompany.businessData.supplies = supplies;
+      }
+    }
 
     // Si no hay insumos cargados en memoria, intentar cargar desde la API de Netcup VPS
     if (supplies.length === 0 && currentCompany && currentCompany.id && currentCompany.selectedPeriod) {

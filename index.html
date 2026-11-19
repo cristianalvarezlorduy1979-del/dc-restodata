@@ -71,8 +71,13 @@
       
       <!-- BADGES FLOTANTES EXTERNOS (LADO IZQUIERDO SOBRE LA IMAGEN DE FONDO) -->
       <div class="auth-floating-badges-left">
-        <div class="auth-floating-pill pill-top">
-          <span class="pill-dot-live">●</span> ECOSISTEMA DC ASESORÍAS
+        <div class="auth-top-badges-row">
+          <div class="auth-floating-pill pill-top">
+            <span class="pill-dot-live">●</span> ECOSISTEMA DC ASESORÍAS
+          </div>
+          <button type="button" id="btn-login-install-pill" class="auth-floating-pill auth-pill-install" title="Instalar aplicación en tu dispositivo">
+            <i class="fa-solid fa-download"></i> Instalar App
+          </button>
         </div>
         <div class="auth-floating-pill pill-bottom">
           <i class="fa-solid fa-fire-burner" style="margin-right: 6px; color: #f59e0b;"></i> Cocina & Operación Gastronómica
@@ -5879,26 +5884,31 @@
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredInstallPrompt = e;
-      if (!isStandalone && pwaBanner && !sessionStorage.getItem('pwa_banner_dismissed')) {
-        pwaBanner.style.display = 'flex';
-      }
       document.querySelectorAll('.btn-install-pwa').forEach(b => b.style.display = 'inline-flex');
     });
 
-    // En móviles, garantizar que el banner y botones de instalar estén visibles
-    if (isMobile && !isStandalone) {
-      setTimeout(() => {
-        if (pwaBanner && !sessionStorage.getItem('pwa_banner_dismissed')) {
-          pwaBanner.style.display = 'flex';
-        }
-        document.querySelectorAll('.btn-install-pwa').forEach(b => b.style.display = 'inline-flex');
-      }, 1000);
-    }
-
     window.addEventListener('appinstalled', () => {
       if (pwaBanner) pwaBanner.style.display = 'none';
+      const pill = document.getElementById('btn-login-install-pill');
+      if (pill) pill.style.display = 'none';
       deferredInstallPrompt = null;
     });
+
+    // Pastilla interactiva de instalación en el login
+    const btnLoginInstallPill = document.getElementById('btn-login-install-pill');
+    if (btnLoginInstallPill) {
+      if (isStandalone) {
+        btnLoginInstallPill.style.display = 'none';
+      }
+      btnLoginInstallPill.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (deferredInstallPrompt) {
+          handleDirectInstall();
+        } else {
+          openMobileModal();
+        }
+      });
+    }
 
     function openMobileModal() {
       if (modalPwaGuide) modalPwaGuide.classList.remove('hidden');

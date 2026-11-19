@@ -4461,7 +4461,12 @@ body.theme-modern-slate .btn-view-mode.active {
 /* ==========================================================================
    PWA & MOBILE APP INSTALL BANNER & STYLES
    ========================================================================== */
-.pwa-install-banner {
+.pwa-install-banner,
+#pwa-install-banner {
+  display: none !important;
+}
+
+.pwa-install-banner-unused {
   position: fixed;
   bottom: 24px;
   left: 50%;
@@ -5082,6 +5087,51 @@ body.theme-modern-slate .btn-view-mode.active {
     justify-content: space-between;
     pointer-events: none;
     z-index: 5;
+  }
+
+  .auth-top-badges-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    pointer-events: auto;
+  }
+
+  .auth-pill-install {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    background: rgba(14, 116, 144, 0.45) !important;
+    border: 1px solid rgba(56, 189, 248, 0.40) !important;
+    color: #f0f9ff !important;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    transition: all 0.22s ease-in-out;
+  }
+
+  .auth-pill-install i {
+    color: #38bdf8;
+    margin-right: 5px;
+    font-size: 11px;
+    transition: transform 0.2s ease;
+  }
+
+  .auth-pill-install:hover {
+    background: rgba(14, 116, 144, 0.88) !important;
+    border-color: rgba(56, 189, 248, 0.75) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(14, 116, 144, 0.45) !important;
+  }
+
+  .auth-pill-install:hover i {
+    transform: translateY(1px);
+  }
+
+  .auth-pill-install:active {
+    transform: translateY(0);
   }
 
   .auth-floating-pill {

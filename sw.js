@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dc-restaurantes-v1_0_4';
+const CACHE_NAME = 'dc-restaurantes-v1_0_6';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
