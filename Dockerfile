@@ -13,6 +13,7 @@ COPY . .
 
 # Crear carpeta de datos con permisos
 RUN mkdir -p /app/data/compras
+VOLUME ["/app/data/compras"]
 
 # Exponer puertos para Traefik / Coolify
 EXPOSE 80 3000
