@@ -8127,7 +8127,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       isFetchingNetcupPurchases = true;
-      const apiUrl = `/api/compras?empresa_id=${encodeURIComponent(companyId)}&period_key=${encodeURIComponent(periodKey)}&_t=${Date.now()}`;
+      const apiBase = (typeof window !== 'undefined' && window.location && window.location.hostname === 'restodata.dcasesoriaslatam.com')
+        ? ''
+        : 'https://restodata.dcasesoriaslatam.com';
+      const apiUrl = `${apiBase}/api/compras?empresa_id=${encodeURIComponent(companyId)}&period_key=${encodeURIComponent(periodKey)}&_t=${Date.now()}`;
       const res = await fetch(apiUrl, { cache: 'no-cache' });
       if (res.ok) {
         const data = await res.json();
