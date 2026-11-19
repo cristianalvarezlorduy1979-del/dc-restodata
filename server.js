@@ -148,6 +148,37 @@ app.get('/api/compras', (req, res) => {
   }
 });
 
+// GET /api/compras/summary - Resumen de compras almacenadas en el servidor
+app.get('/api/compras/summary', (req, res) => {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      return res.json({ success: true, count: 0, files: [] });
+    }
+    const files = fs.readdirSync(DATA_DIR).filter(f => f.endsWith('.json'));
+    const summary = files.map(f => {
+      try {
+        const full = path.join(DATA_DIR, f);
+        const stat = fs.statSync(full);
+        const content = JSON.parse(fs.readFileSync(full, 'utf8'));
+        return {
+          filename: f,
+          empresa_id: content.empresa_id,
+          period_key: content.period_key,
+          suppliersCount: content._recordsCount ? content._recordsCount.suppliers : (content.suppliers || []).length,
+          suppliesCount: content._recordsCount ? content._recordsCount.supplies : (content.supplies || []).length,
+          sizeKB: Math.round(stat.size / 1024),
+          syncedAt: content._syncedAt
+        };
+      } catch (err) {
+        return { filename: f, error: err.message };
+      }
+    });
+    return res.json({ success: true, count: summary.length, files: summary });
+  } catch (e) {
+    return res.status(500).json({ success: false, error: e.message });
+  }
+});
+
 // -----------------------------------------------------------------------------
 // SERVIR ARCHIVOS ESTÁTICOS DEL FRONTEND
 // -----------------------------------------------------------------------------

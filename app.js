@@ -3074,6 +3074,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Renderizar los 14 módulos operativos
     renderAll14Modules();
 
+    // Cargar compras e insumos desde Netcup VPS para el período activo
+    if (typeof fetchPurchasesFromNetcup === 'function' && currentCompany && currentCompany.id && currentCompany.selectedPeriod) {
+      fetchPurchasesFromNetcup(currentCompany.id, currentCompany.selectedPeriod);
+    }
+
     // Actualizar el badge de Período de Auditoría
     updateAuditPeriodBadge();
 
@@ -7797,6 +7802,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let suppliers = (currentCompany && currentCompany.businessData) ? (currentCompany.businessData.suppliers || []) : [];
 
+    // Si no hay compras cargadas en memoria, intentar cargar desde la API de Netcup VPS
+    if (suppliers.length === 0 && currentCompany && currentCompany.id && currentCompany.selectedPeriod) {
+      fetchPurchasesFromNetcup(currentCompany.id, currentCompany.selectedPeriod);
+    }
+
     // Plazoleta de San Antonio: si había datos anteriores sin campo "dia" o con "folio" antiguo, limpiar para iniciar fresco
     if (isPDSA && suppliers.length > 0 && suppliers.some(s => s.folio && !s.dia)) {
       suppliers = [];
@@ -8108,6 +8118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           if (hasUpdated) {
             console.log(`[Netcup API] Compras cargadas para ${companyId} [${periodKey}]:`, data.recordsCount);
+            if (typeof renderSuppliersModule === 'function') renderSuppliersModule();
             if (typeof renderPurchaseCostsModule === 'function') renderPurchaseCostsModule();
             if (typeof renderSuppliesModule === 'function') renderSuppliesModule();
           }
