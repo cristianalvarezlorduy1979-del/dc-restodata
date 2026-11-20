@@ -3728,7 +3728,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const companyName = btn.getAttribute('data-company-name');
         const email = btn.getAttribute('data-email');
         const pass = btn.getAttribute('data-password');
-        const credsText = `🔐 Credenciales de Acceso - DC Asesorías\nEmpresa: ${companyName}\nCorreo: ${email}\nContraseña: ${pass}\nEnlace: https://dcasesorias-col.web.app`;
+        const credsText = `🔐 Credenciales de Acceso - DC Asesorías\nEmpresa: ${companyName}\nCorreo: ${email}\nContraseña: ${pass}\nEnlace: https://restodata.dcasesoriaslatam.com`;
         copyToClipboardText(credsText, `¡Credenciales de "${companyName}" copiadas al portapapeles!`);
       });
     });
