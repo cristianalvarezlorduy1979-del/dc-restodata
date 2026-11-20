@@ -173,6 +173,10 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.add('is-mobile-app');
       document.documentElement.classList.remove('is-web-version');
       document.body.classList.remove('is-web-version');
+      document.body.classList.add('auth-screen-active');
+      if (appContainer) {
+        appContainer.classList.add('auth-web-mode');
+      }
     } else {
       document.documentElement.classList.add('is-web-version');
       document.body.classList.add('is-web-version');

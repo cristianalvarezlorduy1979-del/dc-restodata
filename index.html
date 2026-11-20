@@ -36,7 +36,7 @@
   </script>
   <!-- Google reCAPTCHA v3 SDK -->
   <script src="https://www.google.com/recaptcha/api.js?render=6LcBDRQuAAAAANfXf6euPklvVkXs6nxYszlE9obm"></script>
-  <link rel="stylesheet" href="styles.css?v=1.0.4">
+  <link rel="stylesheet" href="styles.css?v=1.0.8">
   <script>
     (function() {
       var isNative = Boolean(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
@@ -5849,9 +5849,9 @@
   <!-- Firebase SDK v10 Compat (Sincronización en la Nube Firestore en Tiempo Real) -->
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
-  <script src="app.js?v=1.0.2"></script>
+  <script src="app.js?v=1.0.8"></script>
   <script>
-    // 1. Registro de Service Worker PWA con auto-actualización inmediata
+    // 1. Registro de Service Worker PWA con auto-actualización inmediata y limpieza de caché antiguo
     if ('serviceWorker' in navigator) {
       let isRefreshing = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -5861,10 +5861,19 @@
         }
       });
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.4').then((reg) => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.8').then((reg) => {
           reg.update();
         }).catch(err => console.log('SW reg note:', err));
       });
+      if ('caches' in window) {
+        caches.keys().then((names) => {
+          names.forEach((name) => {
+            if (name !== 'dc-restaurantes-v1_0_8') {
+              caches.delete(name);
+            }
+          });
+        });
+      }
     }
 
     // 2. Controlador interactivo de instalación PWA y Modal de Apps Móviles

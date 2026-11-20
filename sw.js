@@ -1,9 +1,9 @@
-const CACHE_NAME = 'dc-restaurantes-v1_0_7';
+const CACHE_NAME = 'dc-restaurantes-v1_0_8';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/styles.css',
-  '/app.js',
+  '/styles.css?v=1.0.8',
+  '/app.js?v=1.0.8',
   '/chart.umd.min.js',
   '/xlsx.full.min.js',
   '/manifest.json',

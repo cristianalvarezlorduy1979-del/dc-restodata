@@ -5542,7 +5542,9 @@ body.theme-modern-slate .btn-view-mode.active {
       background-attachment: scroll !important;
     }
 
-    .auth-floating-badges-left {
+    .auth-floating-badges-left,
+    .is-mobile-app .auth-floating-badges-left,
+    html.is-mobile-app .auth-floating-badges-left {
       display: none !important;
     }
 
