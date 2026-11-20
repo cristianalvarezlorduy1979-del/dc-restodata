@@ -5040,7 +5040,10 @@ body.theme-modern-slate .btn-view-mode.active {
   }
 
 
-  body.is-web-version:not(.is-mobile-app) .app-container.auth-web-mode {
+  }
+
+  .app-container.auth-web-mode,
+  body.auth-screen-active .app-container {
     max-width: 100vw !important;
     width: 100vw !important;
     height: 100vh !important;
@@ -5056,21 +5059,21 @@ body.theme-modern-slate .btn-view-mode.active {
   #auth-section.auth-card-gastronomic,
   .auth-card.auth-card-gastronomic {
     position: relative !important;
-    width: 100vw !important;
-    height: 100vh !important;
+    width: 100% !important;
+    max-width: 100vw !important;
     min-height: 100vh !important;
-    max-height: 100vh !important;
+    min-height: 100dvh !important;
     margin: 0 !important;
     padding: 16px 24px !important;
     box-sizing: border-box !important;
     background: 
-      linear-gradient(135deg, rgba(3, 7, 18, 0.40) 0%, rgba(3, 7, 18, 0.65) 50%, rgba(3, 7, 18, 0.85) 100%),
-      url('assets/login_backgrounds/propuesta_4_cocina_abierta.jpg') center center / cover no-repeat fixed !important;
+      linear-gradient(135deg, rgba(3, 7, 18, 0.45) 0%, rgba(3, 7, 18, 0.70) 50%, rgba(3, 7, 18, 0.88) 100%),
+      url('assets/login_backgrounds/propuesta_4_cocina_abierta.jpg') center center / cover no-repeat !important;
     display: flex !important;
     flex-direction: row !important;
     justify-content: flex-end !important;
     align-items: center !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important;
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
@@ -5216,9 +5219,12 @@ body.theme-modern-slate .btn-view-mode.active {
   }
 
   .auth-brand-logo-img {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
+    width: 36px !important;
+    height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    object-fit: contain !important;
+    display: block !important;
   }
 
   .auth-brand-eyebrow {
@@ -5511,28 +5517,59 @@ body.theme-modern-slate .btn-view-mode.active {
     transform: translateY(-1px);
   }
 
-  /* Adaptación responsive en pantallas pequeñas / móviles */
+  /* Adaptación responsive en pantallas pequeñas / móviles y App Móvil */
   @media (max-width: 900px) {
+    body.auth-screen-active,
+    body.is-mobile-app.auth-screen-active {
+      overflow-y: auto !important;
+      height: auto !important;
+      min-height: 100vh !important;
+      min-height: 100dvh !important;
+      background: #030712 !important;
+    }
+
     #auth-section.auth-card-gastronomic,
     .auth-card.auth-card-gastronomic {
       justify-content: center !important;
-      padding: 12px !important;
+      align-items: center !important;
+      flex-direction: column !important;
+      padding: 24px 16px 36px 16px !important;
       overflow-y: auto !important;
+      height: auto !important;
+      min-height: 100vh !important;
+      min-height: 100dvh !important;
+      max-height: none !important;
+      background-attachment: scroll !important;
     }
+
     .auth-floating-badges-left {
       display: none !important;
     }
+
     .auth-card-gastronomic .auth-forms-panel {
       margin: 0 auto !important;
-      max-width: 100% !important;
+      max-width: 420px !important;
+      width: 100% !important;
     }
+
     .auth-glass-card {
-      padding: 18px 16px !important;
-      border-radius: 16px !important;
+      padding: 22px 20px 18px 20px !important;
+      border-radius: 18px !important;
       max-height: none !important;
+      width: 100% !important;
+      margin: 0 auto !important;
     }
   }
-}
+
+  @media (min-width: 901px) {
+    #auth-section.auth-card-gastronomic,
+    .auth-card.auth-card-gastronomic {
+      height: 100vh !important;
+      max-height: 100vh !important;
+      overflow: hidden !important;
+      background-attachment: fixed !important;
+    }
+  }
 
 
 /* ==========================================================================
