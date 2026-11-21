@@ -1080,6 +1080,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedPeriod: '2026-10',
       lastCalendarMonth: '2026-10',
       enabledModules: [
+        'tab-0-dashboard',
         'tab-reportes-graficos',
         'tab-1-ventas-diarias',
         'tab-2-ventas-forma-pago',
@@ -1120,6 +1121,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedPeriod: '2026-10',
       lastCalendarMonth: '2026-10',
       enabledModules: [
+        'tab-0-dashboard',
         'tab-reportes-graficos',
         'tab-1-ventas-diarias',
         'tab-2-ventas-forma-pago',
@@ -1161,6 +1163,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedPeriod: '2026-10',
       lastCalendarMonth: '2026-10',
       enabledModules: [
+        'tab-0-dashboard',
         'tab-reportes-graficos',
         'tab-1-ventas-diarias',
         'tab-2-ventas-forma-pago',
@@ -1204,6 +1207,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedPeriod: '2026-10',
       lastCalendarMonth: '2026-10',
       enabledModules: [
+        'tab-0-dashboard',
         'tab-reportes-graficos',
         'tab-1-ventas-diarias',
         'tab-2-ventas-forma-pago',
@@ -1243,6 +1247,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedPeriod: '2026-10',
       lastCalendarMonth: '2026-10',
       enabledModules: [
+        'tab-0-dashboard',
         'tab-reportes-graficos',
         'tab-1-ventas-diarias',
         'tab-2-ventas-forma-pago',
@@ -1286,6 +1291,7 @@ document.addEventListener('DOMContentLoaded', () => {
       lastCalendarMonth: '2026-10',
       _isDemoSandbox: true,
       enabledModules: [
+        'tab-0-dashboard',
         'tab-reportes-graficos',
         'tab-1-ventas-diarias',
         'tab-2-ventas-forma-pago',
@@ -1449,6 +1455,9 @@ document.addEventListener('DOMContentLoaded', () => {
         c.enabledModules = [...ALL_SYSTEM_MODULES];
       } else {
         c.enabledModules = c.enabledModules.filter(m => m !== 'tab-13-estadisticas-ventas' && m !== 'tab-inventario-alimentos-medicamentos');
+      }
+      if (!c.enabledModules.includes('tab-0-dashboard')) {
+        c.enabledModules.unshift('tab-0-dashboard');
       }
       if (!c.userType) {
         c.userType = (c.role === 'client' || c.role === 'lite') ? 'lite' : 'master';
@@ -2210,7 +2219,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.custom-module-tab').forEach(el => el.remove());
     document.querySelectorAll('.custom-tab-content').forEach(el => el.remove());
 
-    const enabledModules = company.enabledModules || ALL_SYSTEM_MODULES;
+    const enabledModules = company.enabledModules ? [...company.enabledModules] : [...ALL_SYSTEM_MODULES];
+    if (!enabledModules.includes('tab-0-dashboard')) {
+      enabledModules.unshift('tab-0-dashboard');
+    }
 
     // Control de visibilidad de la Suite Culinaria en la cabecera de la empresa (pastillas redundantes ocultas)
     const culinaryActions = document.getElementById('company-profile-culinary-actions');
@@ -2545,7 +2557,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const navContainer = document.getElementById('sidebar-nav-container');
     if (!navContainer) return;
 
-    const enabledModules = (company && Array.isArray(company.enabledModules)) ? company.enabledModules : ALL_SYSTEM_MODULES;
+    const enabledModules = (company && Array.isArray(company.enabledModules)) ? [...company.enabledModules] : [...ALL_SYSTEM_MODULES];
+    if (!enabledModules.includes('tab-0-dashboard')) {
+      enabledModules.unshift('tab-0-dashboard');
+    }
     const isSandbox = (company && company.id === 'comp_demo_pruebas_sandbox');
 
     navContainer.innerHTML = '';
@@ -2642,7 +2657,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('mega-menu-grid');
     if (!grid) return;
 
-    const enabledModules = (company && Array.isArray(company.enabledModules)) ? company.enabledModules : ALL_SYSTEM_MODULES;
+    const enabledModules = (company && Array.isArray(company.enabledModules)) ? [...company.enabledModules] : [...ALL_SYSTEM_MODULES];
+    if (!enabledModules.includes('tab-0-dashboard')) {
+      enabledModules.unshift('tab-0-dashboard');
+    }
     const isSandbox = (company && company.id === 'comp_demo_pruebas_sandbox');
 
     _megaMenuFlattenedItems = [];
@@ -3031,6 +3049,9 @@ document.addEventListener('DOMContentLoaded', () => {
       freshCompany.periods = { ...(freshCompany.periods || {}), ...currentCompany.periods };
     }
 
+    if (freshCompany && Array.isArray(freshCompany.enabledModules) && !freshCompany.enabledModules.includes('tab-0-dashboard')) {
+      freshCompany.enabledModules.unshift('tab-0-dashboard');
+    }
     currentCompany = freshCompany;
     filterDailyProdState = { fecha: 'ALL', grupo: 'ALL' };
     filterMonthlyProdState = { fecha: 'ALL', grupo: 'ALL' };
