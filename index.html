@@ -3506,6 +3506,20 @@
           <!-- Filtros de Costos de Ventas -->
           <div class="module-filter-bar">
             <div class="filter-group">
+              <label for="filter-cogs-fecha"><i class="fa-regular fa-calendar"></i> Filtrar por Fecha:</label>
+              <select id="filter-cogs-fecha" class="form-select filter-select">
+                <option value="ALL">-- Todo el Período --</option>
+              </select>
+            </div>
+            <div class="filter-group filter-cogs-date-range">
+              <label><i class="fa-regular fa-calendar-days"></i> Rango:</label>
+              <div class="cogs-date-inputs">
+                <input type="date" id="filter-cogs-date-start" class="form-control filter-input-date" title="Fecha Inicial (Desde)">
+                <span class="cogs-date-sep">a</span>
+                <input type="date" id="filter-cogs-date-end" class="form-control filter-input-date" title="Fecha Final (Hasta)">
+              </div>
+            </div>
+            <div class="filter-group">
               <label for="filter-cogs-grupo"><i class="fa-solid fa-layer-group"></i> Filtrar por Grupo:</label>
               <select id="filter-cogs-grupo" class="form-select filter-select">
                 <option value="ALL">-- Todos los Grupos --</option>

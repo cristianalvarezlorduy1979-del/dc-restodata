@@ -4328,6 +4328,46 @@ body.theme-modern-slate .btn-view-mode.active {
   border-color: #fca5a5;
 }
 
+.module-filter-bar .filter-cogs-date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.module-filter-bar .cogs-date-inputs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.module-filter-bar .filter-input-date {
+  height: 38px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  background-color: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 130px;
+  max-width: 155px;
+}
+
+.module-filter-bar .filter-input-date:focus {
+  border-color: #1e3e62;
+  background-color: #ffffff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(30, 62, 98, 0.15);
+}
+
+.module-filter-bar .cogs-date-sep {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+}
+
 /* ==========================================================================
    FILTRO DE RANGO DE FECHAS (MÓDULO VENTAS DIARIAS)
    ========================================================================== */

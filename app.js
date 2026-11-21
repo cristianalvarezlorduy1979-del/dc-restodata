@@ -3060,7 +3060,7 @@ document.addEventListener('DOMContentLoaded', () => {
     filterExpensesState = { fecha: 'ALL', concepto: 'ALL' };
     filterPayrollState = { fecha: 'ALL', empleado: 'ALL' };
     filterTipsState = { vendedor: 'ALL' };
-    filterCogsState = { grupo: 'ALL', producto: 'ALL' };
+    filterCogsState = { fecha: 'ALL', dateStart: '', dateEnd: '', grupo: 'ALL', producto: 'ALL' };
     filterPurchaseCostsState = { proveedor: 'ALL', fecha: 'ALL' };
     salesDateFilter = { from: '', to: '' };
     const activeRole = role || currentCompany.userType || currentCompany.role || 'master';
@@ -5939,6 +5939,28 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${d}-${m}-${y}`;
   }
 
+  // Normaliza cualquier string o formato de fecha a formato ISO 'YYYY-MM-DD'
+  function toISODate(dateStr) {
+    if (!dateStr) return '';
+    const str = String(dateStr).trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+      return str.substring(0, 10);
+    }
+    const slashParts = str.split('/');
+    if (slashParts.length === 3) {
+      if (slashParts[2].length === 4) { // DD/MM/YYYY
+        return `${slashParts[2]}-${slashParts[1].padStart(2, '0')}-${slashParts[0].padStart(2, '0')}`;
+      }
+    }
+    const dashParts = str.split('-');
+    if (dashParts.length === 3) {
+      if (dashParts[2].length === 4) { // DD-MM-YYYY
+        return `${dashParts[2]}-${dashParts[1].padStart(2, '0')}-${dashParts[0].padStart(2, '0')}`;
+      }
+    }
+    return str;
+  }
+
   // Convierte cualquier formato de fecha o fecha-hora al nombre oficial del día en español (ej: "Martes")
   const SPANISH_DAYS_OF_WEEK = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   const CLEAN_DAYS_MAP = {
@@ -7102,7 +7124,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let filterExpensesState = { fecha: 'ALL', concepto: 'ALL' };
   let filterPayrollState = { fecha: 'ALL', empleado: 'ALL' };
   let filterTipsState = { vendedor: 'ALL' };
-  let filterCogsState = { grupo: 'ALL', producto: 'ALL' };
+  let filterCogsState = { fecha: 'ALL', dateStart: '', dateEnd: '', grupo: 'ALL', producto: 'ALL' };
   let filterPurchaseCostsState = { proveedor: 'ALL', fecha: 'ALL' };
 
   // Encabezados y columnas dinámicas para el módulo de Productos Diarios Vendidos
@@ -10962,99 +10984,142 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 10. Costos de Ventas (COGS)
   // Función auxiliar: Consolida datos de Costos de Ventas (COGS)
-  // Si cogs no ha sido subido manualmente, se calcula a partir de los productos vendidos con sus costos
-  function getEffectiveCogsData() {
+  // Permite filtrar por fecha exacta o rango de fechas (filterStart, filterEnd)
+  function getEffectiveCogsData(filterStart, filterEnd) {
     const bd = (currentCompany && currentCompany.businessData) ? currentCompany.businessData : {};
     const manualCogs = Array.isArray(bd.cogs) ? bd.cogs : [];
+    const dailyProds = Array.isArray(bd.dailyProducts) ? bd.dailyProducts : [];
+    const monthlyProds = Array.isArray(bd.monthlyProducts) ? bd.monthlyProducts : [];
 
-    // Si ya hay COGS cargado manualmente con datos reales, usarlo
+    const hasDateFilter = Boolean(filterStart || filterEnd);
+
+    // 1. Si hay filtro de fecha activo y disponemos de dailyProducts con fechas,
+    // consolidar directamente desde dailyProducts filtrados por fecha para obtener el costo real del día o rango
+    if (hasDateFilter && dailyProds.length > 0) {
+      const filteredDaily = dailyProds.filter(p => {
+        const iso = toISODate(p.fecha || p.date);
+        if (!iso) return false;
+        if (filterStart && iso < filterStart) return false;
+        if (filterEnd && iso > filterEnd) return false;
+        return true;
+      });
+      return aggregateProductsToCogs(filteredDaily, true);
+    }
+
+    // 2. Si ya hay COGS cargado manualmente con datos reales:
     if (manualCogs.length > 0 && manualCogs.some(r => (Number(r.venta_costo) || Number(r.costo) || 0) > 0 || (Number(r.vta_total_sin_impo) || 0) > 0)) {
+      if (hasDateFilter && manualCogs.some(r => r.fecha || r.date)) {
+        const filteredManual = manualCogs.filter(r => {
+          const iso = toISODate(r.fecha || r.date);
+          if (!iso) return false;
+          if (filterStart && iso < filterStart) return false;
+          if (filterEnd && iso > filterEnd) return false;
+          return true;
+        });
+        return { cogsList: filteredManual, isAutoCalculated: false };
+      }
       return { cogsList: manualCogs, isAutoCalculated: false };
     }
 
-    // Si no hay COGS manual, consolidar desde dailyProducts o monthlyProducts
-    const dailyProds = Array.isArray(bd.dailyProducts) ? bd.dailyProducts : [];
-    const monthlyProds = Array.isArray(bd.monthlyProducts) ? bd.monthlyProducts : [];
+    // 3. Si no hay COGS manual, consolidar desde dailyProducts o monthlyProducts
     const sourceProds = dailyProds.length > 0 ? dailyProds : monthlyProds;
-
     if (sourceProds.length > 0) {
-      const aggMap = new Map();
-
-      sourceProds.forEach(p => {
-        const prodName = (p.producto || p.name || p.descripcion || '').trim();
-        if (!prodName || prodName === '—') return;
-
-        const grupo = (p.grupo || p.category || 'General').trim() || 'General';
-        const key = `${prodName.toLowerCase()}|||${grupo.toLowerCase()}`;
-
-        const cant = Number(p.cantidad !== undefined ? p.cantidad : (p.quantity || p.cant || p.units || 0)) || 0;
-        const precio = Number(p.precio !== undefined ? p.precio : (p.price || 0)) || 0;
-        const ventaConImpo = Number(p.venta_total !== undefined ? p.venta_total : (p.total !== undefined ? p.total : (cant * precio))) || 0;
-        const taxRegime = (currentCompany && currentCompany.taxRegime) ? currentCompany.taxRegime : 'impoconsumo_8';
-        let taxDivisor = 1.08;
-        if (taxRegime === 'no_responsable_0' || taxRegime === 'impoconsumo_8_net') {
-          taxDivisor = 1.0;
-        } else if (taxRegime === 'iva_19') {
-          taxDivisor = 1.19;
-        }
-        const vtaSinImpo = Number(p.vta_total_sin_impo !== undefined ? p.vta_total_sin_impo : Math.round(ventaConImpo / taxDivisor)) || 0;
-
-        // Obtener costo unitario proveniente de SoftRestaurant (costo, costo_unit, rawCost)
-        const costoUnit = Number(p.costo !== undefined ? p.costo : (p.costo_unit !== undefined ? p.costo_unit : (p.rawCost || 0))) || 0;
-        const ventaCosto = Number(p.costo_total !== undefined ? p.costo_total : (p.venta_costo !== undefined ? p.venta_costo : (costoUnit * cant))) || 0;
-
-        if (!aggMap.has(key)) {
-          aggMap.set(key, {
-            producto: prodName,
-            grupo: grupo,
-            precio: precio,
-            cant: 0,
-            vta_total_sin_impo: 0,
-            costo: costoUnit,
-            venta_costo: 0,
-            utilidad: 0,
-            pct_costo: 0
-          });
-        }
-
-        const entry = aggMap.get(key);
-        entry.cant += cant;
-        entry.vta_total_sin_impo += vtaSinImpo;
-        entry.venta_costo += ventaCosto;
-        if (costoUnit > 0) entry.costo = costoUnit;
-        if (precio > 0) entry.precio = precio;
-      });
-
-      const aggregatedList = Array.from(aggMap.values()).map(item => {
-        const utilidad = item.vta_total_sin_impo - item.venta_costo;
-        const pctCosto = item.vta_total_sin_impo > 0 ? (item.venta_costo / item.vta_total_sin_impo) * 100 : 0;
-        return {
-          producto: item.producto,
-          product: item.producto,
-          grupo: item.grupo,
-          category: item.grupo,
-          precio: item.precio,
-          salePrice: item.precio,
-          cant: item.cant,
-          cantidad: item.cant,
-          vta_total_sin_impo: item.vta_total_sin_impo,
-          costo: item.costo > 0 ? item.costo : (item.cant > 0 ? Math.round(item.venta_costo / item.cant) : 0),
-          rawCost: item.costo > 0 ? item.costo : (item.cant > 0 ? Math.round(item.venta_costo / item.cant) : 0),
-          venta_costo: item.venta_costo,
-          utilidad: utilidad,
-          grossProfit: utilidad,
-          pct_costo: pctCosto,
-          margin: item.vta_total_sin_impo > 0 ? ((utilidad / item.vta_total_sin_impo) * 100) : 0
-        };
-      });
-
-      // Ordenar por Venta Total Sin Impoconsumo descendente
-      aggregatedList.sort((a, b) => b.vta_total_sin_impo - a.vta_total_sin_impo);
-
-      return { cogsList: aggregatedList, isAutoCalculated: true };
+      let filteredSource = sourceProds;
+      if (hasDateFilter) {
+        filteredSource = sourceProds.filter(p => {
+          const iso = toISODate(p.fecha || p.date);
+          if (!iso) return false;
+          if (filterStart && iso < filterStart) return false;
+          if (filterEnd && iso > filterEnd) return false;
+          return true;
+        });
+      }
+      return aggregateProductsToCogs(filteredSource, true);
     }
 
     return { cogsList: [], isAutoCalculated: false };
+  }
+
+  // Agrega una lista de productos individuales (dailyProducts o monthlyProducts) en el formato consolidado de COGS
+  function aggregateProductsToCogs(sourceProds, isAutoCalculated = true) {
+    if (!sourceProds || sourceProds.length === 0) {
+      return { cogsList: [], isAutoCalculated };
+    }
+
+    const aggMap = new Map();
+
+    sourceProds.forEach(p => {
+      const prodName = (p.producto || p.name || p.descripcion || '').trim();
+      if (!prodName || prodName === '—') return;
+
+      const grupo = (p.grupo || p.category || 'General').trim() || 'General';
+      const key = `${prodName.toLowerCase()}|||${grupo.toLowerCase()}`;
+
+      const cant = Number(p.cantidad !== undefined ? p.cantidad : (p.quantity || p.cant || p.units || 0)) || 0;
+      const precio = Number(p.precio !== undefined ? p.precio : (p.price || 0)) || 0;
+      const ventaConImpo = Number(p.venta_total !== undefined ? p.venta_total : (p.total !== undefined ? p.total : (cant * precio))) || 0;
+      const taxRegime = (currentCompany && currentCompany.taxRegime) ? currentCompany.taxRegime : 'impoconsumo_8';
+      let taxDivisor = 1.08;
+      if (taxRegime === 'no_responsable_0' || taxRegime === 'impoconsumo_8_net') {
+        taxDivisor = 1.0;
+      } else if (taxRegime === 'iva_19') {
+        taxDivisor = 1.19;
+      }
+      const vtaSinImpo = Number(p.vta_total_sin_impo !== undefined ? p.vta_total_sin_impo : Math.round(ventaConImpo / taxDivisor)) || 0;
+
+      // Obtener costo unitario proveniente de SoftRestaurant (costo, costo_unit, rawCost)
+      const costoUnit = Number(p.costo !== undefined ? p.costo : (p.costo_unit !== undefined ? p.costo_unit : (p.rawCost || 0))) || 0;
+      const ventaCosto = Number(p.costo_total !== undefined ? p.costo_total : (p.venta_costo !== undefined ? p.venta_costo : (costoUnit * cant))) || 0;
+
+      if (!aggMap.has(key)) {
+        aggMap.set(key, {
+          producto: prodName,
+          grupo: grupo,
+          precio: precio,
+          cant: 0,
+          vta_total_sin_impo: 0,
+          costo: costoUnit,
+          venta_costo: 0,
+          utilidad: 0,
+          pct_costo: 0
+        });
+      }
+
+      const entry = aggMap.get(key);
+      entry.cant += cant;
+      entry.vta_total_sin_impo += vtaSinImpo;
+      entry.venta_costo += ventaCosto;
+      if (costoUnit > 0) entry.costo = costoUnit;
+      if (precio > 0) entry.precio = precio;
+    });
+
+    const aggregatedList = Array.from(aggMap.values()).map(item => {
+      const utilidad = item.vta_total_sin_impo - item.venta_costo;
+      const pctCosto = item.vta_total_sin_impo > 0 ? (item.venta_costo / item.vta_total_sin_impo) * 100 : 0;
+      return {
+        producto: item.producto,
+        product: item.producto,
+        grupo: item.grupo,
+        category: item.grupo,
+        precio: item.precio,
+        salePrice: item.precio,
+        cant: item.cant,
+        cantidad: item.cant,
+        vta_total_sin_impo: item.vta_total_sin_impo,
+        costo: item.costo > 0 ? item.costo : (item.cant > 0 ? Math.round(item.venta_costo / item.cant) : 0),
+        rawCost: item.costo > 0 ? item.costo : (item.cant > 0 ? Math.round(item.venta_costo / item.cant) : 0),
+        venta_costo: item.venta_costo,
+        utilidad: utilidad,
+        grossProfit: utilidad,
+        pct_costo: pctCosto,
+        margin: item.vta_total_sin_impo > 0 ? ((utilidad / item.vta_total_sin_impo) * 100) : 0
+      };
+    });
+
+    // Ordenar por Venta Total Sin Impoconsumo descendente
+    aggregatedList.sort((a, b) => b.vta_total_sin_impo - a.vta_total_sin_impo);
+
+    return { cogsList: aggregatedList, isAutoCalculated };
   }
 
   function updateCogsTableHeaders(isPDSA) {
@@ -11142,16 +11207,89 @@ document.addEventListener('DOMContentLoaded', () => {
     const isPDSA = isCompanyPDSA();
     updateCogsTableHeaders(isPDSA);
 
-    const { cogsList: cogs, isAutoCalculated } = getEffectiveCogsData();
+    const bd = (currentCompany && currentCompany.businessData) ? currentCompany.businessData : {};
+    const dailyProds = Array.isArray(bd.dailyProducts) ? bd.dailyProducts : [];
+    const manualCogs = Array.isArray(bd.cogs) ? bd.cogs : [];
+
+    // 1. Extraer fechas únicas disponibles en los datos
+    const availableDatesSet = new Set();
+    dailyProds.forEach(p => {
+      const iso = toISODate(p.fecha || p.date);
+      if (iso) availableDatesSet.add(iso);
+    });
+    if (availableDatesSet.size === 0) {
+      manualCogs.forEach(r => {
+        const iso = toISODate(r.fecha || r.date);
+        if (iso) availableDatesSet.add(iso);
+      });
+    }
+    const uniqueFechas = Array.from(availableDatesSet).sort();
+
+    // 2. Controles de fecha en la barra de filtros
+    const selFecha = document.getElementById('filter-cogs-fecha');
+    const inputDateStart = document.getElementById('filter-cogs-date-start');
+    const inputDateEnd = document.getElementById('filter-cogs-date-end');
+
+    if (uniqueFechas.length > 0) {
+      const minDate = uniqueFechas[0];
+      const maxDate = uniqueFechas[uniqueFechas.length - 1];
+      if (inputDateStart) {
+        inputDateStart.min = minDate;
+        inputDateStart.max = maxDate;
+      }
+      if (inputDateEnd) {
+        inputDateEnd.min = minDate;
+        inputDateEnd.max = maxDate;
+      }
+    }
+
+    if (selFecha) {
+      const currentFecha = filterCogsState.fecha || 'ALL';
+      let html = '<option value="ALL">-- Todo el Período --</option>';
+      html += '<option value="CUSTOM">📅 Rango Personalizado...</option>';
+      if (uniqueFechas.length > 0) {
+        html += '<optgroup label="Días Específicos">';
+        uniqueFechas.forEach(f => {
+          const sample = dailyProds.find(p => toISODate(p.fecha || p.date) === f);
+          const diaLabel = (sample && sample.dia) ? ` (${sample.dia})` : '';
+          html += `<option value="${f}">${formatShortDate(f)}${diaLabel}</option>`;
+        });
+        html += '</optgroup>';
+      }
+      selFecha.innerHTML = html;
+      selFecha.value = currentFecha;
+    }
+
+    if (inputDateStart) inputDateStart.value = filterCogsState.dateStart || '';
+    if (inputDateEnd) inputDateEnd.value = filterCogsState.dateEnd || '';
+
+    // 3. Etiqueta descriptiva del período o fecha filtrada
+    let dateLabel = '';
+    if (filterCogsState.dateStart && filterCogsState.dateEnd && filterCogsState.dateStart === filterCogsState.dateEnd) {
+      const sample = dailyProds.find(p => toISODate(p.fecha || p.date) === filterCogsState.dateStart);
+      const diaLabel = (sample && sample.dia) ? ` (${sample.dia})` : '';
+      dateLabel = `Día: ${formatShortDate(filterCogsState.dateStart)}${diaLabel}`;
+    } else if (filterCogsState.dateStart || filterCogsState.dateEnd) {
+      const fromStr = filterCogsState.dateStart ? formatShortDate(filterCogsState.dateStart) : 'Inicio';
+      const toStr = filterCogsState.dateEnd ? formatShortDate(filterCogsState.dateEnd) : 'Fin';
+      dateLabel = `Rango: ${fromStr} al ${toStr}`;
+    }
+
+    // 4. Obtener datos efectivos para el filtro de fecha activo
+    const { cogsList: cogs, isAutoCalculated } = getEffectiveCogsData(filterCogsState.dateStart, filterCogsState.dateEnd);
     const tbody = document.getElementById('tbody-cogs');
     const tfoot = document.getElementById('tfoot-cogs');
     const lblSubtitle = document.getElementById('lbl-cogs-subtitle');
 
     if (lblSubtitle) {
+      let dateBadgeHtml = '';
+      if (dateLabel) {
+        dateBadgeHtml = `<span style="background:#e0f2fe;color:#0369a1;padding:3px 8px;border-radius:4px;font-weight:700;margin-right:6px;"><i class="fa-regular fa-calendar-check"></i> ${dateLabel}</span> `;
+      }
       if (isAutoCalculated) {
-        lblSubtitle.innerHTML = '<span style="color:#0284c7;font-weight:600;"><i class="fa-solid fa-wand-magic-sparkles"></i> Generado automáticamente:</span> Cruzando las cantidades vendidas con los costos unitarios de recetas extraídos de SoftRestaurant.';
+        lblSubtitle.innerHTML = `${dateBadgeHtml}<span style="color:#0284c7;font-weight:600;"><i class="fa-solid fa-wand-magic-sparkles"></i> Generado automáticamente:</span> Cruzando las cantidades vendidas con los costos unitarios de recetas extraídos de SoftRestaurant.`;
       } else {
-        lblSubtitle.textContent = 'Costo directo de producción de los productos, venta neta sin impuesto, costo de venta y utilidad bruta';
+        lblSubtitle.innerHTML = `${dateBadgeHtml}Costo directo de producción de los productos, venta neta sin impuesto, costo de venta y utilidad bruta`;
       }
     }
 
@@ -11172,15 +11310,15 @@ document.addEventListener('DOMContentLoaded', () => {
         <tr>
           <td colspan="9" style="text-align:center; padding:36px 20px; color:#64748b; font-size:0.88rem;">
             <i class="fa-solid fa-calculator" style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:10px;"></i>
-            <strong>No hay registros de costos de ventas ni productos cargados</strong><br>
-            <span style="color:#94a3b8; font-size:0.82rem;">Sincroniza tus turnos con el conector de SoftRestaurant o sube la plantilla oficial de Costos de Ventas.</span>
+            <strong>No hay registros de costos de ventas para ${dateLabel || 'el período actual'}</strong><br>
+            <span style="color:#94a3b8; font-size:0.82rem;">Verifica la fecha seleccionada o sincroniza tus turnos con el conector de SoftRestaurant.</span>
           </td>
         </tr>`;
-      updateCogsKPIs(0, 0, 0, 0);
+      updateCogsKPIs(0, 0, 0, 0, dateLabel);
       return;
     }
 
-    // 1. NIVEL 1: Grupos únicos
+    // 5. NIVEL 1: Grupos únicos
     const uniqueGrupos = [...new Set(cogs.map(r => (r.grupo || r.category || '').trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'es'));
     if (selGrupo) {
       const currentGrupo = filterCogsState.grupo;
@@ -11203,7 +11341,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ? cogs
       : cogs.filter(r => (r.grupo || r.category || '').trim().toLowerCase() === filterCogsState.grupo.toLowerCase());
 
-    // 2. NIVEL 2: Productos disponibles dentro del Grupo seleccionado
+    // 6. NIVEL 2: Productos disponibles dentro del Grupo seleccionado
     const uniqueProductos = [...new Set(recordsL1.map(r => (r.producto || r.product || '').trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b, 'es'));
 
     if (selProducto) {
@@ -11228,8 +11366,9 @@ document.addEventListener('DOMContentLoaded', () => {
       : recordsL1.filter(r => (r.producto || r.product || '').trim().toLowerCase() === filterCogsState.producto.toLowerCase());
 
     if (countBadge) {
-      countBadge.textContent = `Mostrando ${filtered.length} de ${cogs.length} productos`;
-      countBadge.style.color = (filtered.length === cogs.length) ? '#334155' : '#0369a1';
+      const extraTag = dateLabel ? ` (${dateLabel})` : '';
+      countBadge.textContent = `Mostrando ${filtered.length} de ${cogs.length} productos${extraTag}`;
+      countBadge.style.color = (filtered.length === cogs.length && !dateLabel) ? '#334155' : '#0369a1';
     }
 
     if (filtered.length === 0) {
@@ -11241,7 +11380,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span style="color:#94a3b8; font-size:0.82rem;">Prueba cambiando el grupo o el producto, o haz clic en "Limpiar Filtros".</span>
           </td>
         </tr>`;
-      updateCogsKPIs(0, 0, 0, 0);
+      updateCogsKPIs(0, 0, 0, 0, dateLabel);
       return;
     }
 
@@ -11341,10 +11480,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 5. Actualizar KPIs superiores
-    updateCogsKPIs(sumVtaTotalSinImpo, sumVentaCosto, sumUtilidad, overallPctCosto);
+    updateCogsKPIs(sumVtaTotalSinImpo, sumVentaCosto, sumUtilidad, overallPctCosto, dateLabel);
   }
 
-  function updateCogsKPIs(ventasNetas, costoTotal, utilidadBruta, pctCosto) {
+  function updateCogsKPIs(ventasNetas, costoTotal, utilidadBruta, pctCosto, dateLabel) {
     const elVentas = document.getElementById('kpi-cogs-ventas');
     const elVentasSub = document.getElementById('kpi-cogs-ventas-sub');
     const elCosto = document.getElementById('kpi-cogs-costo');
@@ -11355,10 +11494,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const elPctSub = document.getElementById('kpi-cogs-pct-sub');
 
     if (elVentas) elVentas.textContent = formatMoney(ventasNetas);
-    if (elVentasSub) elVentasSub.textContent = ventasNetas > 0 ? 'Ingresos netos del período' : 'Sin ventas registradas';
+    if (elVentasSub) {
+      if (dateLabel) {
+        elVentasSub.textContent = `Ingresos netos (${dateLabel})`;
+      } else {
+        elVentasSub.textContent = ventasNetas > 0 ? 'Ingresos netos del período' : 'Sin ventas registradas';
+      }
+    }
 
     if (elCosto) elCosto.textContent = formatMoney(costoTotal);
-    if (elCostoSub) elCostoSub.textContent = costoTotal > 0 ? `${Math.round(pctCosto)}% sobre venta neta` : 'Costo de mercancía';
+    if (elCostoSub) {
+      if (dateLabel) {
+        elCostoSub.textContent = `${Math.round(pctCosto)}% s/venta neta (${dateLabel})`;
+      } else {
+        elCostoSub.textContent = costoTotal > 0 ? `${Math.round(pctCosto)}% sobre venta neta` : 'Costo de mercancía';
+      }
+    }
 
     if (elUtilidad) elUtilidad.textContent = formatMoney(utilidadBruta);
     if (elUtilidadSub) {
@@ -16478,7 +16629,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Para el módulo de Costos de Ventas (COGS): plantilla oficial de D:\INIS y soporte exclusivo para Plazoleta de San Antonio
     if (moduleKey === 'cogs') {
       const isPDSA = isCompanyPDSA();
-      const { cogsList: cogsData } = getEffectiveCogsData();
+      const { cogsList: cogsData } = getEffectiveCogsData(filterCogsState.dateStart, filterCogsState.dateEnd);
       const hasData = Array.isArray(cogsData) && cogsData.length > 0 &&
                       cogsData.some(r => (Number(r.vta_total_sin_impo) || Number(r.venta_costo) || Number(r.precio) || Number(r.salePrice) || 0) > 0 || !!r.producto || !!r.product);
 
@@ -18551,11 +18702,68 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ==========================================================================
-  // FILTROS INTERACTIVOS: COSTOS DE VENTAS
+  // FILTROS INTERACTIVOS: COSTOS DE VENTAS (FECHA, RANGO, GRUPO, PRODUCTO)
   // ==========================================================================
+  const filterCogsFecha = document.getElementById('filter-cogs-fecha');
+  const filterCogsDateStart = document.getElementById('filter-cogs-date-start');
+  const filterCogsDateEnd = document.getElementById('filter-cogs-date-end');
   const filterCogsGrupo = document.getElementById('filter-cogs-grupo');
   const filterCogsProducto = document.getElementById('filter-cogs-producto');
   const btnResetCogsFilter = document.getElementById('btn-reset-cogs-filter');
+
+  if (filterCogsFecha) {
+    filterCogsFecha.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (val === 'ALL') {
+        filterCogsState.fecha = 'ALL';
+        filterCogsState.dateStart = '';
+        filterCogsState.dateEnd = '';
+        if (filterCogsDateStart) filterCogsDateStart.value = '';
+        if (filterCogsDateEnd) filterCogsDateEnd.value = '';
+      } else if (val === 'CUSTOM') {
+        filterCogsState.fecha = 'CUSTOM';
+        filterCogsState.dateStart = filterCogsDateStart ? filterCogsDateStart.value : '';
+        filterCogsState.dateEnd = filterCogsDateEnd ? filterCogsDateEnd.value : '';
+      } else {
+        // Día específico seleccionado
+        filterCogsState.fecha = val;
+        filterCogsState.dateStart = val;
+        filterCogsState.dateEnd = val;
+        if (filterCogsDateStart) filterCogsDateStart.value = val;
+        if (filterCogsDateEnd) filterCogsDateEnd.value = val;
+      }
+      filterCogsState.grupo = 'ALL';
+      filterCogsState.producto = 'ALL';
+      renderCogsModule();
+    });
+  }
+
+  function handleCogsDateRangeChange() {
+    const s = filterCogsDateStart ? filterCogsDateStart.value : '';
+    const e = filterCogsDateEnd ? filterCogsDateEnd.value : '';
+    filterCogsState.dateStart = s;
+    filterCogsState.dateEnd = e;
+    if (s && e && s === e) {
+      filterCogsState.fecha = s;
+      if (filterCogsFecha) filterCogsFecha.value = s;
+    } else if (s || e) {
+      filterCogsState.fecha = 'CUSTOM';
+      if (filterCogsFecha) filterCogsFecha.value = 'CUSTOM';
+    } else {
+      filterCogsState.fecha = 'ALL';
+      if (filterCogsFecha) filterCogsFecha.value = 'ALL';
+    }
+    filterCogsState.grupo = 'ALL';
+    filterCogsState.producto = 'ALL';
+    renderCogsModule();
+  }
+
+  if (filterCogsDateStart) {
+    filterCogsDateStart.addEventListener('change', handleCogsDateRangeChange);
+  }
+  if (filterCogsDateEnd) {
+    filterCogsDateEnd.addEventListener('change', handleCogsDateRangeChange);
+  }
 
   if (filterCogsGrupo) {
     filterCogsGrupo.addEventListener('change', (e) => {
@@ -18571,7 +18779,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (btnResetCogsFilter) {
     btnResetCogsFilter.addEventListener('click', () => {
-      filterCogsState = { grupo: 'ALL', producto: 'ALL' };
+      filterCogsState = { fecha: 'ALL', dateStart: '', dateEnd: '', grupo: 'ALL', producto: 'ALL' };
+      if (filterCogsFecha) filterCogsFecha.value = 'ALL';
+      if (filterCogsDateStart) filterCogsDateStart.value = '';
+      if (filterCogsDateEnd) filterCogsDateEnd.value = '';
       if (filterCogsGrupo) filterCogsGrupo.value = 'ALL';
       if (filterCogsProducto) filterCogsProducto.value = 'ALL';
       renderCogsModule();
