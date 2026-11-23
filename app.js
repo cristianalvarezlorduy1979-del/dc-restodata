@@ -5479,13 +5479,71 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // ACTUALIZAR MATRIZ KASAVANA (RESUMEN 4 CUADRANTES)
-    const elKasStars = document.getElementById('dash-kas-stars-count');
-    const elKasPlow = document.getElementById('dash-kas-plow-count');
-    const elKasPuz = document.getElementById('dash-kas-puzzle-count');
-    const elKasDogs = document.getElementById('dash-kas-dogs-count');
+    // ACTUALIZAR RESUMEN DE COMPRAS DEL PERÍODO (TOP PROVEEDORES)
+    const containerPurchases = document.getElementById('dash-purchases-summary-list');
+    const badgePurchases = document.getElementById('dash-purchases-top-badge');
 
-    let countStars = 0, countHorses = 0, countPuzzles = 0, countDogs = 0;
+    if (containerPurchases) {
+      let purchasesPool = (suppliers && suppliers.length > 0) ? suppliers : (purchaseCosts || []);
+      if (purchasesPool.length === 0 && currentCompany.periods && currentCompany.selectedPeriod && currentCompany.periods[currentCompany.selectedPeriod]) {
+        const pbd = currentCompany.periods[currentCompany.selectedPeriod];
+        purchasesPool = (pbd.suppliers && pbd.suppliers.length > 0) ? pbd.suppliers : (pbd.purchaseCosts || []);
+      }
+
+      const totalPurchases = purchasesPool.reduce((acc, r) => acc + (Number(r.total) || 0), 0);
+      const purchasesPct = totalSales > 0 ? (totalPurchases / totalSales) * 100 : 0;
+      const countInvoices = purchasesPool.length;
+
+      if (badgePurchases) {
+        badgePurchases.textContent = totalPurchases > 0 ? `Total: ${formatMoney(totalPurchases)}` : 'Total: $ 0';
+      }
+
+      if (purchasesPool.length > 0) {
+        const provMap = {};
+        purchasesPool.forEach(p => {
+          let name = (p.proveedor || p.name || 'Proveedor General').trim();
+          if (name === '.' || name === '-' || name === '..' || name === '...') {
+            name = 'Compras Varias / Caja Menor';
+          }
+          const tot = Number(p.total !== undefined ? p.total : (p.subtotal || 0)) || 0;
+          if (!provMap[name]) provMap[name] = { name, total: 0, count: 0 };
+          provMap[name].total += tot;
+          provMap[name].count += 1;
+        });
+
+        const sortedProvs = Object.values(provMap).sort((a, b) => b.total - a.total).slice(0, 5);
+
+        let htmlPurchases = `
+          <div class="purchases-mini-kpi-bar" style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:8px; margin-bottom:10px; font-size:12px;">
+            <span><strong style="color:#0f172a; font-size:13px;">${formatMoney(totalPurchases)}</strong> <span style="color:#64748b; font-size:11px;">(${purchasesPct.toFixed(1)}% s/ventas)</span></span>
+            <span style="color:#475569; font-size:11.5px;"><i class="fa-solid fa-file-invoice" style="color:var(--accent-gold);margin-right:5px;"></i><strong>${countInvoices}</strong> facturas</span>
+          </div>
+          <div class="top-products-list">
+        `;
+
+        sortedProvs.forEach((p, idx) => {
+          const sharePct = totalPurchases > 0 ? ((p.total / totalPurchases) * 100).toFixed(0) : 0;
+          htmlPurchases += `
+            <div class="top-product-item">
+              <div class="top-prod-left">
+                <span class="top-prod-rank rank-${idx + 1}">${idx + 1}</span>
+                <span class="top-prod-name" title="${p.name}"><i class="fa-solid fa-truck" style="color:var(--accent-gold);margin-right:6px;font-size:11px;"></i>${p.name}</span>
+              </div>
+              <span class="top-prod-stats">${formatMoney(p.total)} <span style="font-size:11px; color:#64748b; font-weight:normal;">(${sharePct}%)</span></span>
+            </div>`;
+        });
+
+        htmlPurchases += `</div>`;
+        containerPurchases.innerHTML = htmlPurchases;
+      } else {
+        containerPurchases.innerHTML = `
+          <div style="text-align:center; padding:28px 10px; color:#64748b; font-size:12px;">
+            <i class="fa-solid fa-truck-field" style="font-size:24px; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
+            Sin registro de compras a proveedores para este período
+          </div>`;
+      }
+    }
+
     let menuItems = [];
     if (typeof getActiveCompanyMenuEngData === 'function') {
       try {
@@ -5494,37 +5552,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Aviso obteniendo datos de ingeniería para dashboard:', e);
       }
     }
-
-    if (menuItems.length > 0) {
-      const N = menuItems.length;
-      let totalUnits = 0;
-      let totalMenuCM = 0;
-      menuItems.forEach(item => {
-        const margin = (Number(item.price) || 0) - (Number(item.cost) || 0);
-        const units = Number(item.unitsSold) || 0;
-        totalUnits += units;
-        totalMenuCM += (margin * units);
-      });
-      const avgMargin = totalUnits > 0 ? (totalMenuCM / totalUnits) : (menuItems.reduce((acc, i) => acc + (Number(i.price) - Number(i.cost)), 0) / (N || 1));
-      const hurdleUnits = N > 0 ? (0.70 * (totalUnits / N)) : 0;
-
-      menuItems.forEach(item => {
-        const margin = (Number(item.price) || 0) - (Number(item.cost) || 0);
-        const units = Number(item.unitsSold) || 0;
-        const highProfit = margin >= avgMargin;
-        const highPopularity = units >= hurdleUnits;
-
-        if (highProfit && highPopularity) countStars++;
-        else if (!highProfit && highPopularity) countHorses++;
-        else if (highProfit && !highPopularity) countPuzzles++;
-        else countDogs++;
-      });
-    }
-
-    if (elKasStars) elKasStars.textContent = countStars;
-    if (elKasPlow) elKasPlow.textContent = countHorses;
-    if (elKasPuz) elKasPuz.textContent = countPuzzles;
-    if (elKasDogs) elKasDogs.textContent = countDogs;
 
     // ACTUALIZAR TOP 5 PRODUCTOS MÁS VENDIDOS
     const containerTopProds = document.getElementById('dash-top-products-list');

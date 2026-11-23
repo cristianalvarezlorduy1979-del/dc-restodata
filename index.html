@@ -1751,53 +1751,23 @@
             </div>
           </div>
 
-          <!-- 3. FILA DE INGENIERÍA DE MENÚ Y TOP PLATOS -->
+          <!-- 3. FILA DE RESUMEN DE COMPRAS Y TOP PLATOS -->
           <div class="dashboard-visuals-grid">
-            <!-- Card Kasavana 4 Cuadrantes Resumen -->
+            <!-- Card Resumen de Compras del Período (Top Proveedores) -->
             <div class="dash-widget-card">
               <div class="dash-widget-header">
                 <div class="widget-title-area">
-                  <i class="fa-solid fa-chess-knight text-gold"></i>
-                  <h5>Ingeniería del Menú (Matriz Kasavana & Smith)</h5>
+                  <i class="fa-solid fa-truck-field text-gold"></i>
+                  <h5>Resumen de Compras & Proveedores</h5>
                 </div>
-                <button type="button" class="btn btn-xs btn-outline-gold" onclick="activateTab('tab-menu-engineering')">
-                  <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Matriz
+                <span class="widget-badge" id="dash-purchases-top-badge">Total: $ 0</span>
+                <button type="button" class="btn btn-xs btn-outline-gold" onclick="activateTab('tab-5-compras-proveedor')">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Compras
                 </button>
               </div>
               <div class="dash-widget-body">
-                <div class="kasavana-summary-grid">
-                  <div class="kasavana-quad-mini stars">
-                    <div class="quad-mini-head">
-                      <span class="quad-icon">⭐</span>
-                      <strong class="quad-title">Estrellas</strong>
-                    </div>
-                    <span class="quad-count" id="dash-kas-stars-count">0</span>
-                    <span class="quad-desc">Alto Margen + Alta Venta</span>
-                  </div>
-                  <div class="kasavana-quad-mini plowhorses">
-                    <div class="quad-mini-head">
-                      <span class="quad-icon">🐎</span>
-                      <strong class="quad-title">Caballos Batalla</strong>
-                    </div>
-                    <span class="quad-count" id="dash-kas-plow-count">0</span>
-                    <span class="quad-desc">Bajo Margen + Alta Venta</span>
-                  </div>
-                  <div class="kasavana-quad-mini puzzles">
-                    <div class="quad-mini-head">
-                      <span class="quad-icon">🧩</span>
-                      <strong class="quad-title">Rompecabezas</strong>
-                    </div>
-                    <span class="quad-count" id="dash-kas-puzzle-count">0</span>
-                    <span class="quad-desc">Alto Margen + Baja Venta</span>
-                  </div>
-                  <div class="kasavana-quad-mini dogs">
-                    <div class="quad-mini-head">
-                      <span class="quad-icon">🐕</span>
-                      <strong class="quad-title">Perros</strong>
-                    </div>
-                    <span class="quad-count" id="dash-kas-dogs-count">0</span>
-                    <span class="quad-desc">Bajo Margen + Baja Venta</span>
-                  </div>
+                <div class="purchases-summary-container" id="dash-purchases-summary-list">
+                  <!-- Renderizado dinámicamente -->
                 </div>
               </div>
             </div>
@@ -1818,48 +1788,6 @@
                   <!-- Renderizado dinámicamente -->
                 </div>
               </div>
-            </div>
-          </div>
-
-          <!-- 4. CENTRO DE ACCESOS DIRECTOS INTELIGENTES -->
-          <div class="dashboard-quick-links-card">
-            <div class="quick-links-header">
-              <i class="fa-solid fa-compass text-gold"></i>
-              <h6>Navegación Rápida a Informes Detallados</h6>
-            </div>
-            <div class="quick-links-grid">
-              <button type="button" class="quick-link-btn" onclick="activateTab('tab-14-analisis-mensual')">
-                <i class="fa-solid fa-file-invoice-dollar"></i>
-                <span>Análisis Mensual (P&L)</span>
-              </button>
-              <button type="button" class="quick-link-btn" onclick="activateTab('tab-1-ventas-diarias')">
-                <i class="fa-solid fa-chart-line"></i>
-                <span>Ventas Diarias</span>
-              </button>
-              <button type="button" class="quick-link-btn" onclick="activateTab('tab-2-ventas-forma-pago')">
-                <i class="fa-solid fa-credit-card"></i>
-                <span>Ventas x Forma de Pago</span>
-              </button>
-              <button type="button" class="quick-link-btn" onclick="activateTab('tab-3-productos-diarios')">
-                <i class="fa-solid fa-utensils"></i>
-                <span>Productos Diarios</span>
-              </button>
-              <button type="button" class="quick-link-btn" onclick="activateTab('tab-menu-engineering')">
-                <i class="fa-solid fa-chess-knight"></i>
-                <span>Ingeniería del Menú</span>
-              </button>
-              <button type="button" class="quick-link-btn" onclick="activateTab('tab-5-compras-proveedor')">
-                <i class="fa-solid fa-truck-field"></i>
-                <span>Compras Proveedor</span>
-              </button>
-              <button type="button" class="quick-link-btn" onclick="activateTab('tab-8-nomina')">
-                <i class="fa-solid fa-users"></i>
-                <span>Nómina</span>
-              </button>
-              <button type="button" class="quick-link-btn" onclick="activateTab('tab-reportes-graficos')">
-                <i class="fa-solid fa-chart-pie"></i>
-                <span>Reportes Gráficos</span>
-              </button>
             </div>
           </div>
         </div>
