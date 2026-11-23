@@ -5404,19 +5404,38 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       if (paymentMethods.length > 0) {
-        paymentMethods.forEach(row => {
-          const m = Number(row.monto !== undefined ? row.monto : (row.venta_dia !== undefined ? row.venta_dia : (row.total || 0))) || 0;
-          const metodo = (row.metodo || row.forma_pago || row.canal || '').trim().toLowerCase();
-          if (metodo.includes('tarjet') || metodo.includes('datafono') || metodo.includes('pos') || metodo.includes('credito') || metodo.includes('debito')) {
-            pmTotals['Tarjetas Débito / Crédito'] += m;
-          } else if (metodo.includes('efectivo') || metodo.includes('cash')) {
-            pmTotals['Efectivo'] += m;
-          } else if (metodo.includes('nequi') || metodo.includes('daviplata') || metodo.includes('transf') || metodo.includes('bancolombia')) {
-            pmTotals['Transferencias / Nequi / Daviplata'] += m;
-          } else {
-            pmTotals['Otros'] += m;
-          }
-        });
+        const isDailyPayMatrix = (paymentMethods[0].venta_dia !== undefined || paymentMethods[0].efectivo !== undefined || paymentMethods[0].tarjetas !== undefined || paymentMethods[0].venta_total !== undefined);
+
+        if (isDailyPayMatrix) {
+          paymentMethods.forEach(pm => {
+            const ef = Number(pm.efectivo) || 0;
+            const tar = Number(pm.tarjetas) || 0;
+            const neq = Number(pm.nequi_transferencias !== undefined ? pm.nequi_transferencias : pm.nequi) || 0;
+            const dav = Number(pm.daviplata) || 0;
+            const qr = Number(pm.qr) || 0;
+            const cxc = Number(pm.cxc_pendientes !== undefined ? pm.cxc_pendientes : (pm.cxc || 0));
+            const otros = Number(pm.otros) || 0;
+
+            pmTotals['Tarjetas Débito / Crédito'] += tar;
+            pmTotals['Efectivo'] += ef;
+            pmTotals['Transferencias / Nequi / Daviplata'] += (neq + dav + qr);
+            pmTotals['Otros'] += (cxc + otros);
+          });
+        } else {
+          paymentMethods.forEach(row => {
+            const m = Number(row.monto !== undefined ? row.monto : (row.venta_dia !== undefined ? row.venta_dia : (row.total || 0))) || 0;
+            const metodo = (row.metodo || row.forma_pago || row.canal || '').trim().toLowerCase();
+            if (metodo.includes('tarjet') || metodo.includes('datafono') || metodo.includes('pos') || metodo.includes('credito') || metodo.includes('debito')) {
+              pmTotals['Tarjetas Débito / Crédito'] += m;
+            } else if (metodo.includes('efectivo') || metodo.includes('cash')) {
+              pmTotals['Efectivo'] += m;
+            } else if (metodo.includes('nequi') || metodo.includes('daviplata') || metodo.includes('transf') || metodo.includes('bancolombia')) {
+              pmTotals['Transferencias / Nequi / Daviplata'] += m;
+            } else {
+              pmTotals['Otros'] += m;
+            }
+          });
+        }
       }
 
       const totalPM = Object.values(pmTotals).reduce((a, b) => a + b, 0) || totalSales || 1;
