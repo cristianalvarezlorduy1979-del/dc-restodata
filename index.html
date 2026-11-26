@@ -656,11 +656,20 @@
             <button type="button" class="status-filter-pill active" data-filter="all">
               <span>Todas</span> <span class="pill-count" id="count-all-companies">0</span>
             </button>
-            <button type="button" class="status-filter-pill" data-filter="activa">
-              <i class="fa-solid fa-circle-check" style="color:#10b981;"></i> <span>Activas</span> <span class="pill-count" id="count-active-companies">0</span>
+            <button type="button" class="status-filter-pill" data-filter="activa" title="Empresas con mensualidad al día">
+              <i class="fa-solid fa-circle-check" style="color:#10b981;"></i> <span>Al Día</span> <span class="pill-count" id="count-active-companies">0</span>
             </button>
-            <button type="button" class="status-filter-pill" data-filter="terminada">
-              <i class="fa-solid fa-clock-rotate-left" style="color:#f59e0b;"></i> <span>Contrato Terminado</span> <span class="pill-count" id="count-terminated-companies">0</span>
+            <button type="button" class="status-filter-pill" data-filter="por_vencer" title="Faltan 5 días o menos para su corte">
+              <i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b;"></i> <span>Por Vencer</span> <span class="pill-count" id="count-warning-companies">0</span>
+            </button>
+            <button type="button" class="status-filter-pill" data-filter="en_gracia" title="1 a 5 días después de la fecha de corte">
+              <i class="fa-solid fa-clock" style="color:#ea580c;"></i> <span>En Gracia</span> <span class="pill-count" id="count-grace-companies">0</span>
+            </button>
+            <button type="button" class="status-filter-pill" data-filter="bloqueada" title="Superaron los 5 días de gracia sin pagar">
+              <i class="fa-solid fa-lock" style="color:#dc2626;"></i> <span>Bloqueadas</span> <span class="pill-count" id="count-blocked-companies">0</span>
+            </button>
+            <button type="button" class="status-filter-pill" data-filter="terminada" title="Contratos finalizados o archivados">
+              <i class="fa-solid fa-box-archive" style="color:#64748b;"></i> <span>Terminadas</span> <span class="pill-count" id="count-terminated-companies">0</span>
             </button>
           </div>
           <div class="view-mode-toggle" id="companies-view-toggle">
@@ -940,6 +949,39 @@
         </div>
         <button type="button" class="btn btn-xs btn-outline-warning" id="btn-banner-switch-company">
           <i class="fa-solid fa-building-user"></i> Cambiar Empresa
+        </button>
+      </div>
+
+      <!-- Banner de Recordatorio de Pago / Período de Gracia para el Cliente -->
+      <div id="subscription-reminder-banner" class="subscription-notice-banner hidden">
+        <div class="sub-banner-left">
+          <div class="sub-banner-icon-badge" id="sub-banner-icon">
+            <i class="fa-solid fa-bell"></i>
+          </div>
+          <div class="sub-banner-text-wrap">
+            <div class="sub-banner-headline" id="sub-banner-headline">Recordatorio de Pago de Mensualidad</div>
+            <div class="sub-banner-msg" id="sub-banner-message">Su mensualidad vence el 30 de noviembre. Realice su pago para mantener activo el servicio.</div>
+            <div class="sub-banner-accounts">
+              <span class="sub-acc-pill" title="Clic para copiar"><i class="fa-solid fa-building-columns"></i> <strong>Bancolombia Ahorros:</strong> 91272947576 <button type="button" class="btn-copy-acc-inline" data-acc="91272947576" title="Copiar"><i class="fa-regular fa-copy"></i></button></span>
+              <span class="sub-acc-pill" title="Clic para copiar"><i class="fa-solid fa-mobile-screen-button"></i> <strong>Daviplata:</strong> 3165443285 <button type="button" class="btn-copy-acc-inline" data-acc="3165443285" title="Copiar"><i class="fa-regular fa-copy"></i></button></span>
+            </div>
+          </div>
+        </div>
+        <div class="sub-banner-actions">
+          <a href="#" id="sub-banner-btn-whatsapp" target="_blank" class="btn btn-xs btn-whatsapp-sub">
+            <i class="fa-brands fa-whatsapp"></i> Reportar Pago
+          </a>
+        </div>
+      </div>
+
+      <!-- Banner Informativo para el Usuario Master sobre Pago Vencido -->
+      <div id="subscription-master-warning" class="subscription-master-banner hidden">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-user-shield"></i>
+          <span><strong>Aviso Master:</strong> Esta empresa se encuentra actualmente con pago vencido/bloqueada para el cliente. Puedes reactivarla de inmediato aquí:</span>
+        </div>
+        <button type="button" class="btn btn-xs btn-success" id="btn-master-banner-reactivate">
+          <i class="fa-solid fa-arrows-rotate"></i> Reactivar / Renovar Mes
         </button>
       </div>
 
@@ -5294,7 +5336,7 @@
               <div>
                 <label style="font-size: 0.76rem; font-weight: 700; color: #475569; display: block; margin-bottom: 3px;">Periodicidad de Cobro:</label>
                 <select id="edit-company-billing-period" class="form-control" style="width: 100%; padding: 7px 10px; font-size: 0.85rem; border: 1.5px solid #cbd5e1; border-radius: 6px;">
-                  <option value="mensual">🗓️ Cobro Mensual</option>
+                  <option value="mensual" selected>🗓️ Cobro Mensual (Estándar)</option>
                   <option value="trimestral">📊 Cobro Trimestral</option>
                   <option value="semestral">📈 Cobro Semestral</option>
                   <option value="anual">🏆 Cobro Anual</option>
@@ -5302,7 +5344,7 @@
               </div>
               <div>
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px;">
-                  <label style="font-size: 0.76rem; font-weight: 700; color: #475569; margin: 0;">Tarifa / Cuota del Servicio ($ COP):</label>
+                  <label style="font-size: 0.76rem; font-weight: 700; color: #475569; margin: 0;">Tarifa Mensual ($ COP):</label>
                   <button type="button" id="btn-apply-suggested-fee" class="btn btn-xs btn-outline-primary" style="padding: 1px 6px; font-size: 10px; border-radius: 4px;" title="Calcular y aplicar la tarifa sugerida del plan y periodicidad seleccionados">
                     <i class="fa-solid fa-calculator"></i> Sugerida
                   </button>
@@ -5310,8 +5352,17 @@
                 <input type="number" id="edit-company-contract-fee" class="form-control" placeholder="Ej: 1200000" style="width: 100%; padding: 7px 10px; font-size: 0.85rem; border: 1.5px solid #cbd5e1; border-radius: 6px;">
               </div>
               <div>
-                <label style="font-size: 0.76rem; font-weight: 700; color: #475569; display: block; margin-bottom: 3px;">Día de Cobro / Facturación:</label>
+                <label style="font-size: 0.76rem; font-weight: 700; color: #475569; display: block; margin-bottom: 3px;">Día de Corte Mensual:</label>
                 <input type="number" id="edit-company-billing-day" class="form-control" min="1" max="31" placeholder="Ej: 5" style="width: 100%; padding: 7px 10px; font-size: 0.85rem; border: 1.5px solid #cbd5e1; border-radius: 6px;">
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px;">
+                  <label style="font-size: 0.76rem; font-weight: 700; color: #0284c7; margin: 0;">Fecha Vencimiento Corte:</label>
+                  <button type="button" id="btn-quick-add-month" class="btn btn-xs btn-outline-success" style="padding: 1px 6px; font-size: 10px; border-radius: 4px;" title="Extender o renovar vencimiento por 1 mes adicional">
+                    <i class="fa-solid fa-calendar-plus"></i> +1 Mes
+                  </button>
+                </div>
+                <input type="date" id="edit-company-expiry-date" class="form-control" style="width: 100%; padding: 6px 10px; font-size: 0.85rem; border: 1.5px solid #0284c7; border-radius: 6px; background: #f0f9ff; font-weight: 700; color: #0f172a;">
               </div>
               <div style="grid-column: span 2;">
                 <label style="font-size: 0.76rem; font-weight: 700; color: #475569; display: block; margin-bottom: 3px;">Notas del Contrato / Paquete de Módulos:</label>
@@ -5319,7 +5370,7 @@
               </div>
             </div>
             <small style="color: #64748b; font-size: 0.72rem; margin-top: 6px; display: block;">
-              Permite clasificar a cada empresa según su modalidad contractual de pago (Mensual, Trimestral, Semestral o Anual).
+              Cobro mensual automático: A los 5 días antes de la fecha de corte se inicia el recordatorio. Pasados 5 días de corte sin pago, se suspende el acceso al cliente.
             </small>
           </div>
           <div class="form-group" style="grid-column: span 2;">
@@ -5785,6 +5836,106 @@
       <div class="modal-actions" style="padding: 14px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; background: #ffffff; border-radius: 0 0 18px 18px;">
         <button type="button" class="btn btn-secondary" id="btn-close-modal-backup-footer" style="padding: 8px 20px;">Cerrar</button>
       </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       PANTALLA DE BLOQUEO POR MORA DE PAGO (>5 DÍAS DE CORTE)
+       ========================================================================= -->
+  <div id="subscription-blocking-screen" class="subscription-blocking-overlay hidden">
+    <div class="blocking-card">
+      <div class="blocking-icon-wrap">
+        <div class="blocking-icon-circle">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+      </div>
+      <h2 class="blocking-title">Plataforma Suspendida</h2>
+      <p class="blocking-subtitle" id="blocking-company-subtitle">
+        El servicio para <strong id="blocking-company-name">su empresa</strong> se encuentra suspendido temporalmente por superar los 5 días posteriores a su fecha de corte (<span id="blocking-expiry-date">30 de noviembre</span>).
+      </p>
+
+      <div class="blocking-payment-box">
+        <div class="blocking-payment-header">
+          <i class="fa-solid fa-wallet text-gold"></i>
+          <span>Cuentas Oficiales para Reactivación Inmediata</span>
+        </div>
+
+        <div class="payment-cards-grid">
+          <!-- Tarjeta Bancolombia -->
+          <div class="payment-account-card card-bancolombia">
+            <div class="acc-card-top">
+              <span class="acc-type-pill">Ahorros</span>
+              <span class="acc-bank-brand"><i class="fa-solid fa-building-columns"></i> Bancolombia</span>
+            </div>
+            <div class="acc-number-row">
+              <span class="acc-number">91272947576</span>
+              <button type="button" class="btn-copy-acc-btn" data-acc="91272947576" title="Copiar número de cuenta">
+                <i class="fa-regular fa-copy"></i> Copiar
+              </button>
+            </div>
+            <div class="acc-holder-row">
+              <span>Titular: <strong>DC Asesorías Empresariales</strong></span>
+            </div>
+          </div>
+
+          <!-- Tarjeta Daviplata -->
+          <div class="payment-account-card card-daviplata">
+            <div class="acc-card-top">
+              <span class="acc-type-pill daviplata">Daviplata</span>
+              <span class="acc-bank-brand"><i class="fa-solid fa-mobile-screen-button"></i> Daviplata</span>
+            </div>
+            <div class="acc-number-row">
+              <span class="acc-number">3165443285</span>
+              <button type="button" class="btn-copy-acc-btn" data-acc="3165443285" title="Copiar número Daviplata">
+                <i class="fa-regular fa-copy"></i> Copiar
+              </button>
+            </div>
+            <div class="acc-holder-row">
+              <span>Titular: <strong>Cristian Álvarez Lorduy</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="blocking-instructions-note">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Una vez realizada la transferencia, envíe el comprobante de pago por WhatsApp para que el Administrador reactive la plataforma en minutos.</span>
+        </div>
+      </div>
+
+      <div class="blocking-actions-row">
+        <a href="https://wa.me/573165443285?text=Hola,%20acabo%20de%20realizar%20el%20pago%20de%20la%20mensualidad%20de%20mi%20empresa.%20Adjunto%20el%20comprobante%20para%20reactivar%20el%20acceso%20a%20la%20plataforma." id="btn-blocking-whatsapp" target="_blank" class="btn btn-whatsapp-blocking">
+          <i class="fa-brands fa-whatsapp"></i> Reportar Pago por WhatsApp
+        </a>
+        <button type="button" id="btn-blocking-logout" class="btn btn-outline-blocking-logout" onclick="handleLogout()">
+          <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL DE AGRADECIMIENTO POR PAGO AL CLIENTE
+       ========================================================================= -->
+  <div id="modal-payment-thankyou" class="modal-backdrop hidden">
+    <div class="modal-box modal-box-celebrate" style="max-width: 480px; text-align: center; padding: 32px 24px;">
+      <div class="celebrate-icon-bounce">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <h3 style="margin: 12px 0 8px; font-size: 1.45rem; font-weight: 800; color: #065f46;">
+        ¡Muchas Gracias por su Pago!
+      </h3>
+      <p style="margin: 0 0 16px; font-size: 0.95rem; color: #334155; line-height: 1.5;">
+        Su mensualidad ha sido renovada con éxito. Su nuevo período de servicio se encuentra activo hasta el:
+      </p>
+      <div class="thankyou-date-badge" id="lbl-thankyou-expiry-date">
+        <i class="fa-regular fa-calendar-check"></i> <span>30 de Diciembre, 2026</span>
+      </div>
+      <p style="margin: 16px 0 24px; font-size: 0.88rem; color: #64748b; line-height: 1.5;">
+        Siga disfrutando de todos los servicios, módulos y reportes en tiempo real de la plataforma <strong>DC RestoData</strong>.
+      </p>
+      <button type="button" id="btn-dismiss-thankyou" class="btn btn-primary btn-block btn-lg" style="font-weight: 700; padding: 12px 20px; font-size: 1rem; border-radius: 10px;">
+        <i class="fa-solid fa-utensils"></i> Continuar a la Plataforma
+      </button>
     </div>
   </div>
 

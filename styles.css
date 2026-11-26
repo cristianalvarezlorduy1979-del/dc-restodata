@@ -12188,3 +12188,496 @@ body.dashboard-screen-active .grecaptcha-badge,
     padding-left: 26px;
   }
 }
+
+
+/* ==========================================================================
+   SISTEMA DE GESTIÓN DE SUSCRIPCIÓN Y RECORDATORIOS / BLOQUEO MENSUAL
+   ========================================================================== */
+
+/* Banner de recordatorio para el cliente */
+.subscription-notice-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1.5px solid #fde68a;
+  border-left: 6px solid #f59e0b;
+  border-radius: 12px;
+  margin: 12px 0 18px;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.12);
+  animation: fadeInDown 0.3s ease-out;
+}
+
+.subscription-notice-banner.banner-warning {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-color: #fde68a;
+  border-left-color: #f59e0b;
+}
+
+.subscription-notice-banner.banner-grace {
+  background: linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%);
+  border-color: #fecdd3;
+  border-left-color: #e11d48;
+}
+
+.sub-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 280px;
+}
+
+.sub-banner-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #f59e0b;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+}
+
+.subscription-notice-banner.banner-grace .sub-banner-icon-badge {
+  background: #e11d48;
+  box-shadow: 0 4px 10px rgba(225, 29, 72, 0.3);
+}
+
+.sub-banner-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sub-banner-headline {
+  font-size: 14px;
+  font-weight: 800;
+  color: #92400e;
+}
+
+.subscription-notice-banner.banner-grace .sub-banner-headline {
+  color: #9f1239;
+}
+
+.sub-banner-msg {
+  font-size: 13px;
+  color: #78350f;
+  line-height: 1.4;
+}
+
+.subscription-notice-banner.banner-grace .sub-banner-msg {
+  color: #881337;
+}
+
+.sub-banner-accounts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.sub-acc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #1e293b;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.btn-copy-acc-inline {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  padding: 2px 4px;
+  font-size: 11px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.btn-copy-acc-inline:hover {
+  color: #0f172a;
+  background: #e2e8f0;
+}
+
+.btn-whatsapp-sub {
+  background: #25d366 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  padding: 8px 14px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(37, 211, 102, 0.3);
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-whatsapp-sub:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
+}
+
+/* Banner de advertencia para el usuario Master */
+.subscription-master-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  border-left: 6px solid #475569;
+  border-radius: 10px;
+  margin: 10px 0 16px;
+  color: #1e293b;
+  font-size: 13px;
+}
+
+/* Pantalla de bloqueo absoluto (>5 días de mora) */
+.subscription-blocking-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+  animation: fadeIn 0.3s ease;
+}
+
+.blocking-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.45);
+  max-width: 620px;
+  width: 100%;
+  padding: 36px 32px;
+  text-align: center;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  position: relative;
+  animation: scaleUp 0.3s ease-out;
+}
+
+.blocking-icon-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.blocking-icon-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #fee2e2;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.25);
+  animation: pulseLock 2s infinite ease-in-out;
+}
+
+@keyframes pulseLock {
+  0% { transform: scale(1); box-shadow: 0 8px 24px rgba(220, 38, 38, 0.25); }
+  50% { transform: scale(1.06); box-shadow: 0 12px 30px rgba(220, 38, 38, 0.4); }
+  100% { transform: scale(1); box-shadow: 0 8px 24px rgba(220, 38, 38, 0.25); }
+}
+
+.blocking-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.blocking-subtitle {
+  font-size: 14.5px;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.blocking-payment-box {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.blocking-payment-header {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payment-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 600px) {
+  .payment-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.payment-account-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px;
+  border: 1.5px solid #e2e8f0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.payment-account-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+.payment-account-card.card-bancolombia {
+  border-top: 4px solid #fd0;
+}
+
+.payment-account-card.card-daviplata {
+  border-top: 4px solid #ed1c24;
+}
+
+.acc-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.acc-type-pill {
+  background: #e2e8f0;
+  color: #334155;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.acc-type-pill.daviplata {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.acc-bank-brand {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 12px;
+}
+
+.acc-number-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f1f5f9;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.acc-number {
+  font-family: monospace;
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.5px;
+}
+
+.btn-copy-acc-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.btn-copy-acc-btn:hover {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.acc-holder-row {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.blocking-instructions-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #065f46;
+  line-height: 1.4;
+}
+
+.blocking-actions-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+@media (max-width: 500px) {
+  .blocking-actions-row {
+    flex-direction: column;
+  }
+}
+
+.btn-whatsapp-blocking {
+  background: #25d366 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  padding: 12px 22px !important;
+  border-radius: 10px !important;
+  border: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14.5px;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+  text-decoration: none;
+  flex: 1;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn-whatsapp-blocking:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(37, 211, 102, 0.45);
+}
+
+.btn-outline-blocking-logout {
+  background: #f8fafc !important;
+  color: #64748b !important;
+  border: 1.5px solid #cbd5e1 !important;
+  font-weight: 600 !important;
+  padding: 12px 18px !important;
+  border-radius: 10px !important;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btn-outline-blocking-logout:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Modal de agradecimiento */
+.modal-box-celebrate {
+  background: #ffffff;
+  border-radius: 20px;
+  border-top: 6px solid #10b981;
+  box-shadow: 0 25px 60px -12px rgba(16, 185, 129, 0.35);
+}
+
+.celebrate-icon-bounce {
+  font-size: 56px;
+  color: #10b981;
+  margin-bottom: 8px;
+  animation: bounceIn 0.8s ease;
+}
+
+.thankyou-date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ecfdf5;
+  border: 1.5px solid #a7f3d0;
+  color: #047857;
+  font-weight: 800;
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 30px;
+}
+
+/* Badges de suscripción para la tabla y tarjetas del Master */
+.badge.badge-sub-active {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.badge.badge-sub-warning {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  animation: pulseWarning 2.5s infinite;
+}
+
+.badge.badge-sub-grace {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  animation: pulseGrace 2s infinite;
+}
+
+.badge.badge-sub-blocked {
+  background: #475569;
+  color: #ffffff;
+  border: 1px solid #334155;
+}
+
+@keyframes pulseWarning {
+  0% { opacity: 1; }
+  50% { opacity: 0.75; }
+  100% { opacity: 1; }
+}
+
+@keyframes pulseGrace {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}

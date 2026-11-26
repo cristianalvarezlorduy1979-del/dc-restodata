@@ -1477,6 +1477,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!c.billingPeriod) {
         c.billingPeriod = 'mensual';
       }
+      if (!c.contractExpiryDate) {
+        c.contractExpiryDate = '2026-11-30';
+      }
       if (typeof c.contractFee === 'undefined' || c.contractFee === 320000) {
         c.contractFee = (c.id === 'comp_demo_pruebas_sandbox') ? 750000 : 1000000;
       }
@@ -3130,6 +3133,107 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    // =========================================================================
+    // CONTROL DE SUSCRIPCIÓN MENSUAL: RECORDATORIO, GRACIA Y BLOQUEO
+    // =========================================================================
+    const subStatus = getCompanySubscriptionStatus(currentCompany);
+    const isMasterUser = (currentUserRole === 'master');
+
+    // 1. Pantalla de bloqueo total si el cliente supera los 5 días de gracia tras corte
+    const blockingScreen = document.getElementById('subscription-blocking-screen');
+    if (blockingScreen) {
+      if (!isMasterUser && subStatus.isBlocked) {
+        blockingScreen.classList.remove('hidden');
+        const lblName = document.getElementById('blocking-company-name');
+        if (lblName) lblName.textContent = currentCompany.companyName;
+        const lblExp = document.getElementById('blocking-expiry-date');
+        if (lblExp) lblExp.textContent = subStatus.expiryDateFormatted;
+        const btnWa = document.getElementById('btn-blocking-whatsapp');
+        if (btnWa) {
+          const msg = encodeURIComponent(`Hola, acabo de realizar el pago de la mensualidad de la empresa ${currentCompany.companyName} (NIT: ${currentCompany.nit || ''}). Adjunto el comprobante para reactivar la plataforma.`);
+          btnWa.href = `https://wa.me/573165443285?text=${msg}`;
+        }
+      } else {
+        blockingScreen.classList.add('hidden');
+      }
+    }
+
+    // 2. Banner de recordatorio para cliente (faltando <= 5 días o en período de gracia <= 5 días)
+    const reminderBanner = document.getElementById('subscription-reminder-banner');
+    if (reminderBanner) {
+      if (!isMasterUser && !subStatus.isBlocked && (subStatus.isWarning || subStatus.isGrace)) {
+        reminderBanner.classList.remove('hidden');
+        const iconEl = document.getElementById('sub-banner-icon');
+        const headlineEl = document.getElementById('sub-banner-headline');
+        const messageEl = document.getElementById('sub-banner-message');
+
+        if (subStatus.isGrace) {
+          reminderBanner.classList.add('banner-grace');
+          reminderBanner.classList.remove('banner-warning');
+          if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+          if (headlineEl) headlineEl.textContent = `Aviso de Pago Vencido - Período de Gracia (${subStatus.graceText})`;
+          if (messageEl) messageEl.textContent = `Su fecha de corte fue el ${subStatus.expiryDateFormatted}. Por favor realice su pago hoy a Bancolombia o Daviplata para evitar la suspensión de la plataforma.`;
+        } else {
+          reminderBanner.classList.add('banner-warning');
+          reminderBanner.classList.remove('banner-grace');
+          if (iconEl) iconEl.innerHTML = '<i class="fa-solid fa-bell"></i>';
+          if (headlineEl) headlineEl.textContent = 'Recordatorio de Pago de Mensualidad';
+          if (messageEl) messageEl.textContent = `Su mensualidad vence el ${subStatus.expiryDateFormatted} (${subStatus.label}). Transfiera con anticipación para mantener activo el servicio.`;
+        }
+        const btnWa = document.getElementById('sub-banner-btn-whatsapp');
+        if (btnWa) {
+          const msg = encodeURIComponent(`Hola, envío comprobante de pago de mensualidad para la empresa ${currentCompany.companyName}.`);
+          btnWa.href = `https://wa.me/573165443285?text=${msg}`;
+        }
+      } else {
+        reminderBanner.classList.add('hidden');
+      }
+    }
+
+    // 3. Banner informativo para Master cuando entra a una empresa con pago vencido o bloqueada
+    const masterWarningBanner = document.getElementById('subscription-master-warning');
+    if (masterWarningBanner) {
+      if (isMasterUser && (subStatus.isBlocked || subStatus.isGrace || subStatus.isWarning)) {
+        masterWarningBanner.classList.remove('hidden');
+        const btnReactivate = document.getElementById('btn-master-banner-reactivate');
+        if (btnReactivate) {
+          btnReactivate.onclick = () => {
+            reactivateCompanySubscription(currentCompany.id, 1);
+          };
+        }
+      } else {
+        masterWarningBanner.classList.add('hidden');
+      }
+    }
+
+    // 4. Modal de Agradecimiento por Pago al Cliente
+    if (!isMasterUser && currentCompany.paymentThankYouPending) {
+      const modalThankYou = document.getElementById('modal-payment-thankyou');
+      if (modalThankYou) {
+        modalThankYou.classList.remove('hidden');
+        const lblThankYouExp = document.getElementById('lbl-thankyou-expiry-date');
+        if (lblThankYouExp) {
+          lblThankYouExp.innerHTML = `<i class="fa-regular fa-calendar-check"></i> <span>${subStatus.expiryDateFormatted}</span>`;
+        }
+        const btnDismiss = document.getElementById('btn-dismiss-thankyou');
+        if (btnDismiss) {
+          btnDismiss.onclick = () => {
+            modalThankYou.classList.add('hidden');
+            currentCompany.paymentThankYouPending = false;
+            const allComps = getCompanies();
+            const found = allComps.find(c => c.id === currentCompany.id);
+            if (found) {
+              found.paymentThankYouPending = false;
+              saveCompanies(allComps);
+              if (typeof syncCompanyToCloud === 'function') {
+                syncCompanyToCloud(found);
+              }
+            }
+          };
+        }
+      }
+    }
+
     // Fecha actual en el badge
     const today = new Date();
     const dateFormatted = today.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -3178,13 +3282,209 @@ document.addEventListener('DOMContentLoaded', () => {
     loginForm.reset();
     showToast('Has cerrado sesión correctamente.', 'info');
   }
+  window.handleLogout = handleLogout;
 
   // ==========================================================================
-  // PANEL MASTER: SELECCIÓN Y GESTIÓN MULTIEMPRESA
+  // PANEL MASTER: SELECCIÓN Y GESTIÓN MULTIEMPRESA Y SUSCRIPCIONES
   // ==========================================================================
-  let masterCompanyStatusFilter = 'all'; // 'all' | 'activa' | 'terminada'
+  let masterCompanyStatusFilter = 'all'; // 'all' | 'activa' | 'por_vencer' | 'en_gracia' | 'bloqueada' | 'terminada'
   let masterCompaniesViewMode = localStorage.getItem('masterCompaniesViewMode') || 'list';
   let pendingConfirmCallback = null;
+
+  // Lógica oficial de contratos y cobros mensuales
+  function getCompanySubscriptionStatus(company) {
+    if (!company) {
+      return {
+        status: 'activa',
+        label: 'Al Día',
+        isBlocked: false,
+        isWarning: false,
+        isGrace: false,
+        daysDiff: 999,
+        daysLeft: 999,
+        overdueDays: 0,
+        expiryDateFormatted: '30 de Noviembre, 2026'
+      };
+    }
+
+    // El usuario / empresa Master nunca se bloquea
+    const isMaster = (company.id === 'comp_master_dc' || (company.email || '').toLowerCase() === MASTER_EMAIL.toLowerCase() || company.role === 'master' || company.userType === 'master');
+    if (isMaster) {
+      return {
+        status: 'activa',
+        label: 'Empresa Master',
+        isBlocked: false,
+        isWarning: false,
+        isGrace: false,
+        isMaster: true,
+        daysDiff: 999,
+        daysLeft: 999,
+        overdueDays: 0,
+        expiryDateFormatted: 'Indefinida'
+      };
+    }
+
+    if (company.status === 'terminada') {
+      return {
+        status: 'terminada',
+        label: 'Terminado',
+        isBlocked: false,
+        isTerminated: true,
+        isWarning: false,
+        isGrace: false,
+        daysDiff: -999,
+        daysLeft: 0,
+        overdueDays: 999,
+        expiryDateFormatted: company.contractExpiryDate || 'Terminado'
+      };
+    }
+
+    // Fecha de vencimiento / corte mensual
+    let expiryStr = company.contractExpiryDate;
+    if (!expiryStr || !/^\d{4}-\d{2}-\d{2}$/.test(expiryStr)) {
+      expiryStr = '2026-11-30';
+    }
+
+    const parts = expiryStr.split('-');
+    const expYear = parseInt(parts[0], 10);
+    const expMonth = parseInt(parts[1], 10) - 1;
+    const expDay = parseInt(parts[2], 10);
+
+    const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const expiryDateFormatted = `${expDay} de ${monthNames[expMonth]} de ${expYear}`;
+
+    const now = new Date();
+    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    const expMidnight = new Date(expYear, expMonth, expDay, 0, 0, 0);
+
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const diffDays = Math.round((expMidnight.getTime() - todayMidnight.getTime()) / msPerDay);
+
+    if (diffDays > 5) {
+      // Faltan más de 5 días para la fecha de corte
+      return {
+        status: 'activa',
+        label: `Al Día (${diffDays}d)`,
+        isBlocked: false,
+        isWarning: false,
+        isGrace: false,
+        daysDiff: diffDays,
+        daysLeft: diffDays,
+        overdueDays: 0,
+        expiryDateFormatted,
+        expiryStr
+      };
+    } else if (diffDays >= 0 && diffDays <= 5) {
+      // Faltan 5 días o menos para la fecha de corte
+      const dayText = diffDays === 0 ? 'Vence HOY' : (diffDays === 1 ? 'Vence en 1 día' : `Vence en ${diffDays} días`);
+      return {
+        status: 'por_vencer',
+        label: dayText,
+        isBlocked: false,
+        isWarning: true,
+        isGrace: false,
+        daysDiff: diffDays,
+        daysLeft: diffDays,
+        overdueDays: 0,
+        expiryDateFormatted,
+        expiryStr
+      };
+    } else {
+      // Días de mora tras la fecha de corte
+      const overdueDays = Math.abs(diffDays);
+      if (overdueDays <= 5) {
+        // Período de Gracia: 1 a 5 días de retraso
+        const graceLeft = 5 - overdueDays;
+        const graceText = graceLeft === 0 ? 'Último día de gracia' : `${graceLeft} día${graceLeft === 1 ? '' : 's'} de gracia`;
+        return {
+          status: 'en_gracia',
+          label: `Gracia (${graceLeft}d)`,
+          graceText,
+          isBlocked: false,
+          isWarning: false,
+          isGrace: true,
+          daysDiff: diffDays,
+          daysLeft: 0,
+          overdueDays,
+          graceDaysLeft: graceLeft,
+          expiryDateFormatted,
+          expiryStr
+        };
+      } else {
+        // Bloqueo total: más de 5 días después de la fecha de corte
+        return {
+          status: 'bloqueada',
+          label: `Bloqueada (+${overdueDays}d)`,
+          isBlocked: true,
+          isWarning: false,
+          isGrace: false,
+          daysDiff: diffDays,
+          daysLeft: 0,
+          overdueDays,
+          expiryDateFormatted,
+          expiryStr
+        };
+      }
+    }
+  }
+  window.getCompanySubscriptionStatus = getCompanySubscriptionStatus;
+
+  // Reactivación / Renovación de 1 mes por parte del Master
+  function reactivateCompanySubscription(companyId, extendMonths = 1) {
+    const companies = getCompanies();
+    const comp = companies.find(c => c.id === companyId);
+    if (!comp) {
+      showToast('Empresa no encontrada para reactivar', 'error');
+      return;
+    }
+
+    const now = new Date();
+    let baseDate = new Date();
+    if (comp.contractExpiryDate && /^\d{4}-\d{2}-\d{2}$/.test(comp.contractExpiryDate)) {
+      const parts = comp.contractExpiryDate.split('-');
+      const currentExp = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      if (currentExp > now) {
+        baseDate = currentExp;
+      }
+    }
+
+    const targetMonth = baseDate.getMonth() + extendMonths;
+    const targetYear = baseDate.getFullYear() + Math.floor(targetMonth / 12);
+    const normalizedMonth = ((targetMonth % 12) + 12) % 12;
+    const targetDay = Math.min(baseDate.getDate(), new Date(targetYear, normalizedMonth + 1, 0).getDate());
+
+    const newYear = targetYear;
+    const newMonth = String(normalizedMonth + 1).padStart(2, '0');
+    const newDay = String(targetDay).padStart(2, '0');
+    const newExpiryDate = `${newYear}-${newMonth}-${newDay}`;
+
+    comp.contractExpiryDate = newExpiryDate;
+    comp.status = 'activa';
+    comp.paymentThankYouPending = true;
+    comp.lastPaymentDate = new Date().toISOString();
+    comp._updatedAt = Date.now();
+
+    saveCompanies(companies);
+    if (typeof syncCompanyToCloud === 'function') {
+      syncCompanyToCloud(comp);
+    }
+
+    showToast(`¡Plataforma reactivada exitosamente para "${comp.companyName}"! Nuevo corte: ${newExpiryDate}`, 'success');
+
+    if (typeof renderMasterCompaniesGrid === 'function') {
+      const inputSearch = document.getElementById('input-search-companies');
+      renderMasterCompaniesGrid(inputSearch ? inputSearch.value : '');
+    }
+
+    const masterWarningBanner = document.getElementById('subscription-master-warning');
+    if (masterWarningBanner) masterWarningBanner.classList.add('hidden');
+
+    const blockingScreen = document.getElementById('subscription-blocking-screen');
+    if (blockingScreen) blockingScreen.classList.add('hidden');
+
+    return newExpiryDate;
+  }
+  window.reactivateCompanySubscription = reactivateCompanySubscription;
 
   function showConfirmModal({
     title = 'Confirmar Acción',
@@ -3303,20 +3603,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Actualizar contadores de las píldoras de filtro
     const totalAll = companies.length;
-    const totalActive = companies.filter(c => (c.status || 'activa') === 'activa').length;
-    const totalTerminated = companies.filter(c => (c.status || 'activa') === 'terminada').length;
+    let totalActive = 0;
+    let totalWarning = 0;
+    let totalGrace = 0;
+    let totalBlocked = 0;
+    let totalTerminated = 0;
+
+    companies.forEach(c => {
+      if ((c.status || 'activa') === 'terminada') {
+        totalTerminated++;
+      } else {
+        const sub = getCompanySubscriptionStatus(c);
+        if (sub.status === 'bloqueada') totalBlocked++;
+        else if (sub.status === 'en_gracia') totalGrace++;
+        else if (sub.status === 'por_vencer') totalWarning++;
+        else totalActive++;
+      }
+    });
 
     const countAllEl = document.getElementById('count-all-companies');
     const countActiveEl = document.getElementById('count-active-companies');
+    const countWarningEl = document.getElementById('count-warning-companies');
+    const countGraceEl = document.getElementById('count-grace-companies');
+    const countBlockedEl = document.getElementById('count-blocked-companies');
     const countTerminatedEl = document.getElementById('count-terminated-companies');
     if (countAllEl) countAllEl.textContent = totalAll;
     if (countActiveEl) countActiveEl.textContent = totalActive;
+    if (countWarningEl) countWarningEl.textContent = totalWarning;
+    if (countGraceEl) countGraceEl.textContent = totalGrace;
+    if (countBlockedEl) countBlockedEl.textContent = totalBlocked;
     if (countTerminatedEl) countTerminatedEl.textContent = totalTerminated;
 
     const filtered = companies.filter(c => {
-      const st = c.status || 'activa';
-      if (masterCompanyStatusFilter !== 'all' && st !== masterCompanyStatusFilter) {
-        return false;
+      const isTerm = ((c.status || 'activa') === 'terminada');
+      const sub = getCompanySubscriptionStatus(c);
+      if (masterCompanyStatusFilter !== 'all') {
+        if (masterCompanyStatusFilter === 'terminada') {
+          if (!isTerm) return false;
+        } else if (isTerm) {
+          return false;
+        } else if (masterCompanyStatusFilter === 'activa') {
+          if (sub.status !== 'activa') return false;
+        } else if (masterCompanyStatusFilter === 'por_vencer') {
+          if (sub.status !== 'por_vencer') return false;
+        } else if (masterCompanyStatusFilter === 'en_gracia') {
+          if (sub.status !== 'en_gracia') return false;
+        } else if (masterCompanyStatusFilter === 'bloqueada') {
+          if (sub.status !== 'bloqueada') return false;
+        }
       }
       if (!query) return true;
       const name = (c.companyName || '').toLowerCase();
@@ -3370,6 +3704,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const isMasterCompany = (c.email || "").toLowerCase() === MASTER_EMAIL.toLowerCase();
       const isTerminated = (c.status || 'activa') === 'terminada';
       const isSandbox = (c.id === 'comp_demo_pruebas_sandbox');
+      const sub = getCompanySubscriptionStatus(c);
 
       const modulesCount = (c.enabledModules && Array.isArray(c.enabledModules)) ? c.enabledModules.length : 14;
       const salesCount = (c.businessData && Array.isArray(c.businessData.sales)) ? c.businessData.sales.length : 0;
@@ -3407,15 +3742,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 </span>
                 ${taxBadgeHtml}
                 ${!isMasterCompany ? `
-                  <span class="badge-status-contract ${isTerminated ? 'terminated' : 'active'}" style="font-size:10px; padding:2px 7px;">
-                    <i class="fa-solid ${isTerminated ? 'fa-clock-rotate-left' : 'fa-circle-check'}"></i> ${isTerminated ? 'Terminado' : 'Activa'}
-                  </span>
+                  ${isTerminated ? `
+                    <span class="badge-status-contract terminated" style="font-size:10px; padding:2px 7px;">
+                      <i class="fa-solid fa-clock-rotate-left"></i> Terminado
+                    </span>
+                  ` : (sub.status === 'bloqueada' ? `
+                    <span class="badge badge-sub-blocked" style="font-size:10px; padding:2px 7px; border-radius:12px;" title="Bloqueada por mora (>5 días tras fecha de corte)">
+                      <i class="fa-solid fa-lock"></i> ${sub.label}
+                    </span>
+                  ` : (sub.status === 'en_gracia' ? `
+                    <span class="badge badge-sub-grace" style="font-size:10px; padding:2px 7px; border-radius:12px;" title="En período de gracia de 5 días tras corte">
+                      <i class="fa-solid fa-clock"></i> ${sub.label}
+                    </span>
+                  ` : (sub.status === 'por_vencer' ? `
+                    <span class="badge badge-sub-warning" style="font-size:10px; padding:2px 7px; border-radius:12px;" title="Faltan <=5 días para el corte de mensualidad">
+                      <i class="fa-solid fa-triangle-exclamation"></i> ${sub.label}
+                    </span>
+                  ` : `
+                    <span class="badge badge-sub-active" style="font-size:10px; padding:2px 7px; border-radius:12px;" title="Al día. Fecha corte: ${sub.expiryDateFormatted}">
+                      <i class="fa-solid fa-circle-check"></i> Al Día (${sub.expiryDateFormatted})
+                    </span>
+                  `)))}
                   <span class="badge-service-plan" style="font-size:10px; padding:2px 7px; border-radius:12px; background:${planCfg.bg}; color:${planCfg.color}; border:1px solid ${planCfg.border};" title="${planCfg.description || ''}">
                     <i class="fa-solid ${planCfg.icon}"></i> ${planCfg.name}
                   </span>
                   <span class="badge-billing-period" style="font-size:10px; padding:2px 7px;">
-                    <i class="fa-solid fa-file-invoice-dollar" style="color:${c.billingPeriod === 'anual' ? '#eab308' : (c.billingPeriod === 'semestral' ? '#8b5cf6' : (c.billingPeriod === 'trimestral' ? '#0284c7' : '#10b981'))};"></i>
-                    ${c.billingPeriod === 'anual' ? 'Anual' : (c.billingPeriod === 'semestral' ? 'Semestral' : (c.billingPeriod === 'trimestral' ? 'Trimestral' : 'Mensual'))}
+                    <i class="fa-solid fa-file-invoice-dollar" style="color:#10b981;"></i>
+                    Mensual
                   </span>
                   ${c.contractFee > 0 ? `
                     <span class="badge-contract-fee" style="font-size:10px; padding:2px 7px;" title="Tarifa">${formatMoney(c.contractFee)}</span>
@@ -3478,6 +3831,12 @@ document.addEventListener('DOMContentLoaded', () => {
               <i class="fa-solid fa-key"></i>
               <span>Clave</span>
             </button>
+            ${!isMasterCompany ? `
+              <button type="button" class="btn-row-action btn-row-reactivate-sub btn-reactivate-subscription" data-company-id="${c.id}" data-company-name="${c.companyName}" title="Reactivar / Renovar 1 Mes de Servicio">
+                <i class="fa-solid fa-calendar-plus" style="color:#10b981;"></i>
+                <span>+1 Mes</span>
+              </button>
+            ` : ''}
             ${!isMasterCompany ? (isTerminated ? `
               <button type="button" class="btn-row-action btn-row-reactivate btn-reactivate-company" data-company-id="${c.id}" data-company-name="${c.companyName}" title="Reactivar contrato">
                 <i class="fa-solid fa-arrows-rotate"></i>
@@ -3515,17 +3874,34 @@ document.addEventListener('DOMContentLoaded', () => {
                   </span>
                   ${taxBadgeHtml}
                   ${!isMasterCompany ? `
-                    <span class="badge-status-contract ${isTerminated ? 'terminated' : 'active'}">
-                      <i class="fa-solid ${isTerminated ? 'fa-clock-rotate-left' : 'fa-circle-check'}"></i>
-                      ${isTerminated ? 'Contrato Terminado' : 'Activa'}
-                    </span>
+                    ${isTerminated ? `
+                      <span class="badge-status-contract terminated">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Contrato Terminado
+                      </span>
+                    ` : (sub.status === 'bloqueada' ? `
+                      <span class="badge badge-sub-blocked" style="font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:12px;" title="Bloqueada por mora (>5 días tras fecha de corte)">
+                        <i class="fa-solid fa-lock"></i> ${sub.label}
+                      </span>
+                    ` : (sub.status === 'en_gracia' ? `
+                      <span class="badge badge-sub-grace" style="font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:12px;" title="En período de gracia de 5 días tras corte">
+                        <i class="fa-solid fa-clock"></i> ${sub.label}
+                      </span>
+                    ` : (sub.status === 'por_vencer' ? `
+                      <span class="badge badge-sub-warning" style="font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:12px;" title="Faltan <=5 días para el corte mensual">
+                        <i class="fa-solid fa-triangle-exclamation"></i> ${sub.label}
+                      </span>
+                    ` : `
+                      <span class="badge badge-sub-active" style="font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:12px;" title="Al día. Fecha corte: ${sub.expiryDateFormatted}">
+                        <i class="fa-solid fa-circle-check"></i> Al Día (${sub.expiryDateFormatted})
+                      </span>
+                    `)))}
                     <span class="badge-service-plan" style="font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:12px; background:${planCfg.bg}; color:${planCfg.color}; border:1px solid ${planCfg.border}; display:inline-flex; align-items:center; gap:4px;" title="${planCfg.description || ''}">
                       <i class="fa-solid ${planCfg.icon}"></i>
                       ${planCfg.name}
                     </span>
                     <span class="badge-billing-period" title="Modalidad de cobro del contrato">
-                      <i class="fa-solid fa-file-invoice-dollar" style="color:${c.billingPeriod === 'anual' ? '#eab308' : (c.billingPeriod === 'semestral' ? '#8b5cf6' : (c.billingPeriod === 'trimestral' ? '#0284c7' : '#10b981'))};"></i>
-                      ${c.billingPeriod === 'anual' ? 'Cobro Anual' : (c.billingPeriod === 'semestral' ? 'Cobro Semestral' : (c.billingPeriod === 'trimestral' ? 'Cobro Trimestral' : 'Cobro Mensual'))}
+                      <i class="fa-solid fa-file-invoice-dollar" style="color:#10b981;"></i>
+                      Cobro Mensual
                     </span>
                     ${c.contractFee > 0 ? `
                       <span class="badge-contract-fee" title="Tarifa del contrato">
@@ -3606,6 +3982,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button type="button" class="btn btn-xs btn-outline-dark btn-change-company-pass" data-company-id="${c.id}" data-company-name="${c.companyName}" data-company-email="${c.email}" data-current-pass="${c.password || '123456'}" title="Restablecer o cambiar la contraseña de acceso de este cliente">
                   <i class="fa-solid fa-key"></i>
                   <span>Clave</span>
+                </button>
+                <button type="button" class="btn btn-xs btn-outline-success btn-reactivate-subscription" data-company-id="${c.id}" data-company-name="${c.companyName}" title="Reactivar / Sumar +1 Mes de Mensualidad">
+                  <i class="fa-solid fa-calendar-plus"></i>
+                  <span>+1 Mes</span>
                 </button>
                 ${isTerminated ? `
                   <button type="button" class="btn btn-xs btn-outline-success btn-reactivate-company" data-company-id="${c.id}" data-company-name="${c.companyName}" title="Reactivar contratación de esta empresa">
@@ -3708,6 +4088,25 @@ document.addEventListener('DOMContentLoaded', () => {
           icon: 'fa-arrows-rotate',
           onConfirm: () => {
             updateCompanyStatus(companyId, 'activa');
+          }
+        });
+      });
+    });
+
+    // Vincular botones para reactivar / renovar 1 mes de mensualidad
+    masterCompaniesGrid.querySelectorAll('.btn-reactivate-subscription').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const companyId = btn.getAttribute('data-company-id');
+        const companyName = btn.getAttribute('data-company-name');
+        showConfirmModal({
+          title: 'Reactivar Mensualidad (+1 Mes)',
+          message: `¿Deseas reactivar y sumar <strong>1 mes de servicio</strong> a <strong>${companyName}</strong>?<br><br>Se actualizará la fecha de corte, se desbloqueará la plataforma de inmediato y al cliente le saldrá el mensaje de agradecimiento.`,
+          confirmText: 'Sí, Reactivar +1 Mes',
+          confirmType: 'success',
+          icon: 'fa-calendar-plus',
+          onConfirm: () => {
+            reactivateCompanySubscription(companyId, 1);
           }
         });
       });
@@ -4683,6 +5082,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (passMasterEl) passMasterEl.value = company.passwordMaster || '';
     if (passLiteEl) passLiteEl.value = company.passwordLite || '';
 
+    const expiryDateEl = document.getElementById('edit-company-expiry-date');
+    if (expiryDateEl) expiryDateEl.value = company.contractExpiryDate || '2026-11-30';
+
+    const btnQuickAddMonth = document.getElementById('btn-quick-add-month');
+    if (btnQuickAddMonth) {
+      btnQuickAddMonth.onclick = () => {
+        let curVal = expiryDateEl ? expiryDateEl.value : '';
+        let base = new Date();
+        if (curVal && /^\d{4}-\d{2}-\d{2}$/.test(curVal)) {
+          const parts = curVal.split('-');
+          base = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        }
+        const targetMonth = base.getMonth() + 1;
+        const targetYear = base.getFullYear() + Math.floor(targetMonth / 12);
+        const normalizedMonth = ((targetMonth % 12) + 12) % 12;
+        const targetDay = Math.min(base.getDate(), new Date(targetYear, normalizedMonth + 1, 0).getDate());
+        const newY = targetYear;
+        const newM = String(normalizedMonth + 1).padStart(2, '0');
+        const newD = String(targetDay).padStart(2, '0');
+        if (expiryDateEl) expiryDateEl.value = `${newY}-${newM}-${newD}`;
+      };
+    }
+
     if (modalEditCompany) modalEditCompany.classList.remove('hidden');
   }
 
@@ -4719,6 +5141,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const billingPeriod = document.getElementById('edit-company-billing-period')?.value || 'mensual';
       const contractFee = Number(document.getElementById('edit-company-contract-fee')?.value) || 0;
       const billingDay = Number(document.getElementById('edit-company-billing-day')?.value) || 1;
+      const contractExpiryDate = (document.getElementById('edit-company-expiry-date')?.value || '').trim();
       const contractNotes = (document.getElementById('edit-company-contract-notes')?.value || '').trim();
       const password = (document.getElementById('edit-company-password')?.value || '').trim();
       const passwordMaster = (document.getElementById('edit-company-password-master')?.value || '').trim();
@@ -4762,6 +5185,7 @@ document.addEventListener('DOMContentLoaded', () => {
       comp.billingPeriod = billingPeriod;
       comp.contractFee = contractFee;
       comp.billingDay = billingDay;
+      if (contractExpiryDate) comp.contractExpiryDate = contractExpiryDate;
       comp.contractNotes = contractNotes;
 
       // Asignar los módulos oficiales del plan seleccionado (Básico, Estándar o Pro)
@@ -4857,6 +5281,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     document.body.removeChild(el);
   }
+
+  // Delegación de clic para copiar cuentas bancarias de pago (Bancolombia y Daviplata)
+  document.addEventListener('click', (e) => {
+    const copyBtn = e.target.closest('.btn-copy-acc-btn, .btn-copy-acc-inline, .sub-acc-pill');
+    if (copyBtn) {
+      const acc = copyBtn.getAttribute('data-acc') || (copyBtn.querySelector('[data-acc]') ? copyBtn.querySelector('[data-acc]').getAttribute('data-acc') : null);
+      if (acc) {
+        e.stopPropagation();
+        copyToClipboardText(acc, `¡Número de cuenta ${acc} copiado al portapapeles!`);
+      }
+    }
+  });
 
   function openChangePasswordModal(companyId, companyName, companyEmail, currentPass) {
     const modal = document.getElementById('modal-change-company-password');
