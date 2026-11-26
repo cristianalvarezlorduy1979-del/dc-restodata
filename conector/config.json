@@ -1,0 +1,51 @@
+{
+  "comentario": "Configuracion Oficial Conector Soft Restaurant 11 -> DC Restaurantes",
+  "empresa": {
+    "empresa_id": "comp_1790372186947_v0pdlrg",
+    "nombre_restaurante": "Restaurante El Pasito",
+    "nit": "1065594720"
+  },
+  "sql_server": {
+    "servidor": ".\\NATIONALSOFT",
+    "base_datos": "softrestaurant11",
+    "usuario": "sa",
+    "clave": "National09*",
+    "usar_autenticacion_windows": true,
+    "driver": "ODBC Driver 11 for SQL Server"
+  },
+  "sincronizacion": {
+    "api_url": "https://dcasesorias-col.firebaseapp.com",
+    "netcup_api_url": "https://restodata.dcasesoriaslatam.com",
+    "sincronizar_por_cierre_de_turno": true,
+    "hora_corte_operativo": 6,
+    "intervalo_segundos": 120
+  },
+  "modulos": {
+    "ventas_diarias": true,
+    "formas_de_pago": true,
+    "productos_vendidos": true,
+    "compras_proveedores": true,
+    "costos_insumos": true,
+    "almuerzo_personal": true,
+    "bajas_mermas": true
+  },
+  "conceptos_almacen": {
+    "palabras_comida_personal": [
+      "personal",
+      "empleado",
+      "almuerzo",
+      "comida",
+      "alimentacion",
+      "cuadrilla"
+    ],
+    "palabras_bajas_mermas": [
+      "merma",
+      "desperdicio",
+      "baja",
+      "caduc",
+      "rotura",
+      "deterioro",
+      "descarte"
+    ]
+  }
+}

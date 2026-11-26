@@ -1,0 +1,81 @@
+================================================================================
+CONECTOR OFICIAL SOFT RESTAURANT 11 -> DC RESTAURANTES (CLOUD)
+Desarrollado para DC Asesorías Empresariales
+Plataforma Web: https://dcasesorias-col.firebaseapp.com
+================================================================================
+
+Este paquete es 100% PORTABLE Y AUTÓNOMO. 
+NO REQUIERE INSTALAR PYTHON NI CONFIGURAR DEPENDENCIAS COMPLEJAS EN EL PC DEL CLIENTE.
+
+--------------------------------------------------------------------------------
+GUÍA RÁPIDA DE INSTALACIÓN EN EL PC DEL CLIENTE (4 PASOS):
+--------------------------------------------------------------------------------
+
+PASO 1: COPIAR LA CARPETA
+- Copia esta carpeta completa ("CONECTOR_CLIENTE_DC_RESTAURANTES") en el disco local 
+  del computador donde esté instalado Soft Restaurant (por ejemplo en C:\ o D:\).
+
+PASO 2: ASIGNAR LA EMPRESA (Solo se hace una vez)
+- Haz doble clic en "CONFIGURAR_EMPRESA.bat".
+- Te mostrará la configuración actual y te preguntará:
+  1. Nombre del Restaurante (Ej: Natal)
+  2. ID de la Empresa en DC Restaurantes (Ej: comp_1791483439223_u53rxi3)
+  3. NIT del Restaurante
+- Presiona Enter y listo; la configuración queda guardada automáticamente en config.json.
+
+PASO 3: VALIDAR LA CONEXIÓN
+- Haz doble clic en "1_PROBAR_CONEXION.bat".
+- Si todo está correcto, saldrá en pantalla en color verde:
+  "[OK] CONEXION EXITOSA CON SOFT RESTAURANT 11!"
+
+PASO 4: ACTIVAR ARRANQUE AUTOMÁTICO (¡NUEVO Y RECOMENDADO!)
+- Haz doble clic en "INSTALAR_INICIO_AUTOMATICO.bat".
+- Este asistente configura Windows para que el monitor se inicie SOLO cada vez
+  que se prenda o reinicie el computador.
+- Además lo activa de inmediato en segundo plano (100% invisible).
+- ¡Listo! Ya NO necesitas volver a entrar por AnyDesk para encenderlo o sincronizar a mano.
+
+--------------------------------------------------------------------------------
+CÓMO SUBIR INFORMACIÓN A LA PLATAFORMA:
+--------------------------------------------------------------------------------
+
+1. SUBIDA 100% AUTOMÁTICA EN SEGUNDO PLANO (MODO NORMAL):
+- Con el "INSTALAR_INICIO_AUTOMATICO.bat" ya activado, el monitor vigila cada 
+  2 minutos en silencio.
+- En cuanto detecta cobros o cierres de turno, extrae las ventas del mes 
+  completas y las sincroniza en la nube sin borrar días previos ni alterar 
+  las compras/gastos de Excel ya registrados.
+
+2. CARGA HISTÓRICA INICIAL (Para subir todos los meses anteriores hacia atrás):
+- Haz doble clic en "4_SINCRONIZAR_HISTORIAL_COMPLETO.bat".
+- El conector leerá todas las ventas de todos los meses pasados que tenga 
+  el cliente en Soft Restaurant (enero, febrero, marzo... etc.) y los subirá 
+  organizados mes a mes a DC Restaurantes.
+
+3. SUBIDA MANUAL POR CORTE DE CAJA (Opcional):
+- Si alguna vez deseas forzar la subida inmediata de un turno recién cerrado:
+  Haz doble clic en "2_SINCRONIZAR_CIERRE_TURNO.bat".
+
+--------------------------------------------------------------------------------
+ARCHIVOS INCLUIDOS EN ESTE PAQUETE:
+--------------------------------------------------------------------------------
+- INSTALAR_INICIO_AUTOMATICO.bat    -> Activa inicio automático en Windows y arranca el monitor
+- DESINSTALAR_INICIO_AUTOMATICO.bat -> Detiene el monitor y quita el arranque con Windows
+- 1_PROBAR_CONEXION.bat             -> Prueba comunicación con SQL Server
+- 2_SINCRONIZAR_CIERRE_TURNO.bat    -> Sube el último turno cerrado de forma manual
+- 3_ACTIVAR_MONITOR_AUTOMATICO.vbs  -> Vigilante invisible de cierre de turno (modo manual)
+- 4_SINCRONIZAR_HISTORIAL_COMPLETO.bat -> Carga masiva de TODOS los meses pasados
+- 5_VERIFICAR_ALMACEN_Y_MERMAS.bat  -> Diagnóstico de tablas y conceptos de almacén (Almuerzo y Mermas)
+- CONFIGURAR_EMPRESA.bat            -> Asistente rápido para cambiar de empresa
+- ACTUALIZAR_CONECTOR.bat           -> Copia de seguridad preventiva antes de actualizar
+- config.json                       -> Archivo de configuración central (con palabras clave para almacén)
+- sincronizador_cierre_turno.exe    -> Motor de sincronización acumulativa mensual (.EXE)
+- sincronizador_historico.exe       -> Motor de sincronización histórica (.EXE)
+- exportaciones_turnos/             -> Respaldos JSON locales de cada subida
+================================================================================
+MÓDULOS DE ALMACÉN AUTOMÁTICOS:
+- Almuerzo Personal : Extrae automáticamente las salidas de almacén con conceptos
+  relacionados con 'personal', 'empleado', 'almuerzo', 'comida', 'alimentación', 'cuadrilla'.
+- Bajas y Desperdicios : Extrae automáticamente las salidas de almacén con conceptos
+  relacionados con 'merma', 'desperdicio', 'baja', 'caducidad', 'rotura', 'deterioro', 'descarte'.
+================================================================================

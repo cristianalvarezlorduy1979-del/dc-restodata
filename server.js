@@ -49,10 +49,10 @@ app.get('/api/status', (req, res) => {
 // ENDPOINTS DE COMPRAS (MÓDULOS 5 Y 6)
 // -----------------------------------------------------------------------------
 
-// POST /api/compras - Recibe compras de proveedores e insumos desde el conector
+// POST /api/compras - Recibe compras de proveedores, insumos, almuerzo personal y mermas desde el conector
 app.post('/api/compras', (req, res) => {
   try {
-    const { empresa_id, period_key, suppliers, supplies, token } = req.body;
+    const { empresa_id, period_key, suppliers, supplies, staffLunch, waste, token } = req.body;
 
     if (!empresa_id || !period_key) {
       return res.status(400).json({ success: false, message: 'Faltan parámetros empresa_id o period_key' });
@@ -70,12 +70,12 @@ app.post('/api/compras', (req, res) => {
     const filePath = path.join(DATA_DIR, filename);
 
     // Si ya existen datos previos, podemos combinarlos o reemplazarlos con la versión consolidada
-    let existingData = { suppliers: [], supplies: [] };
+    let existingData = { suppliers: [], supplies: [], staffLunch: [], waste: [] };
     if (fs.existsSync(filePath)) {
       try {
         existingData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       } catch (e) {
-        existingData = { suppliers: [], supplies: [] };
+        existingData = { suppliers: [], supplies: [], staffLunch: [], waste: [] };
       }
     }
 
@@ -84,20 +84,24 @@ app.post('/api/compras', (req, res) => {
       period_key: safePeriod,
       suppliers: Array.isArray(suppliers) ? suppliers : (existingData.suppliers || []),
       supplies: Array.isArray(supplies) ? supplies : (existingData.supplies || []),
+      staffLunch: Array.isArray(staffLunch) ? staffLunch : (existingData.staffLunch || []),
+      waste: Array.isArray(waste) ? waste : (existingData.waste || []),
       _syncedAt: new Date().toISOString(),
       _recordsCount: {
         suppliers: Array.isArray(suppliers) ? suppliers.length : (existingData.suppliers ? existingData.suppliers.length : 0),
-        supplies: Array.isArray(supplies) ? supplies.length : (existingData.supplies ? existingData.supplies.length : 0)
+        supplies: Array.isArray(supplies) ? supplies.length : (existingData.supplies ? existingData.supplies.length : 0),
+        staffLunch: Array.isArray(staffLunch) ? staffLunch.length : (existingData.staffLunch ? existingData.staffLunch.length : 0),
+        waste: Array.isArray(waste) ? waste.length : (existingData.waste ? existingData.waste.length : 0)
       }
     };
 
     fs.writeFileSync(filePath, JSON.stringify(payloadToSave, null, 2), 'utf8');
 
-    console.log(`[API Netcup] Compras guardadas exitosamente: ${payloadToSave._recordsCount.suppliers} facturas, ${payloadToSave._recordsCount.supplies} insumos para ${safeEmpresa} [${safePeriod}]`);
+    console.log(`[API Netcup] Datos guardados exitosamente: ${payloadToSave._recordsCount.suppliers} facturas, ${payloadToSave._recordsCount.supplies} insumos, ${payloadToSave._recordsCount.staffLunch} almuerzos, ${payloadToSave._recordsCount.waste} mermas para ${safeEmpresa} [${safePeriod}]`);
 
     return res.json({
       success: true,
-      message: 'Compras sincronizadas exitosamente en Netcup VPS',
+      message: 'Compras, insumos y movimientos de almacén sincronizados exitosamente en Netcup VPS',
       recordsCount: payloadToSave._recordsCount,
       timestamp: payloadToSave._syncedAt
     });
@@ -128,6 +132,8 @@ app.get('/api/compras', (req, res) => {
         period_key: safePeriod,
         suppliers: [],
         supplies: [],
+        staffLunch: [],
+        waste: [],
         message: 'Sin compras sincronizadas en Netcup para este período'
       });
     }
@@ -139,6 +145,8 @@ app.get('/api/compras', (req, res) => {
       period_key: safePeriod,
       suppliers: data.suppliers || [],
       supplies: data.supplies || [],
+      staffLunch: data.staffLunch || [],
+      waste: data.waste || [],
       syncedAt: data._syncedAt || null,
       recordsCount: data._recordsCount || { suppliers: 0, supplies: 0 }
     });

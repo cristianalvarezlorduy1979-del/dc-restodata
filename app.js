@@ -8237,8 +8237,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await res.json();
         const hasSuppliers = Array.isArray(data.suppliers) && data.suppliers.length > 0;
         const hasSupplies = Array.isArray(data.supplies) && data.supplies.length > 0;
+        const hasStaffLunch = Array.isArray(data.staffLunch) && data.staffLunch.length > 0;
+        const hasWaste = Array.isArray(data.waste) && data.waste.length > 0;
 
-        if (data && data.success && (hasSuppliers || hasSupplies)) {
+        if (data && data.success && (hasSuppliers || hasSupplies || hasStaffLunch || hasWaste)) {
           lastFetchedNetcupKey = fetchKey;
           if (!currentCompany.businessData) currentCompany.businessData = {};
           if (!currentCompany.periods) currentCompany.periods = {};
@@ -8263,8 +8265,29 @@ document.addEventListener('DOMContentLoaded', () => {
             hasUpdated = true;
           }
 
+          if (hasStaffLunch) {
+            currentCompany.periods[periodKey].staffLunch = data.staffLunch;
+            if (currentCompany.selectedPeriod === periodKey) {
+              currentCompany.businessData.staffLunch = data.staffLunch;
+            }
+            hasUpdated = true;
+          }
+
+          if (hasWaste) {
+            currentCompany.periods[periodKey].waste = data.waste;
+            if (currentCompany.selectedPeriod === periodKey) {
+              currentCompany.businessData.waste = data.waste;
+            }
+            hasUpdated = true;
+          }
+
           if (hasUpdated) {
-            console.log(`[Netcup API] Compras cargadas para ${companyId} [${periodKey}]:`, data.recordsCount || { suppliers: (data.suppliers || []).length, supplies: (data.supplies || []).length });
+            console.log(`[Netcup API] Datos sincronizados para ${companyId} [${periodKey}]:`, data.recordsCount || {
+              suppliers: (data.suppliers || []).length,
+              supplies: (data.supplies || []).length,
+              staffLunch: (data.staffLunch || []).length,
+              waste: (data.waste || []).length
+            });
             try {
               sessionStorage.setItem(SESSION_KEY, JSON.stringify({ company: currentCompany, role: currentUserRole }));
             } catch (eSession) {}
@@ -8273,6 +8296,8 @@ document.addEventListener('DOMContentLoaded', () => {
               if (typeof renderSuppliersModule === 'function') renderSuppliersModule();
               if (typeof renderPurchaseCostsModule === 'function') renderPurchaseCostsModule();
               if (typeof renderSuppliesModule === 'function') renderSuppliesModule();
+              if (typeof renderStaffLunchModule === 'function') renderStaffLunchModule();
+              if (typeof renderWasteModule === 'function') renderWasteModule();
               if (typeof renderPnlModule === 'function') renderPnlModule();
             }
           }
